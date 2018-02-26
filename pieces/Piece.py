@@ -4,13 +4,22 @@ Created on Feb 26, 2018
 @author: NREPAL
 '''
 
-import chess
+
 
 MOVE_FLAG = False
 KILL_FLAG = False
 black_position_list = []
 white_position_list = []
 
+def check_position(x, y):
+    pass
+
+def check_square_color(x, y):
+    if x + y & 1:
+        return 'black' # odd: 6 & 1 = 0
+    else:
+        return 'white'
+    
 class Piece(object):
     '''
     classdocs
@@ -44,14 +53,28 @@ class Pawn(Piece):
                         self.y = y
                     else:
                         KILL_FLAG = False
+                        MOVE_FLAG = False
+                else:
+                    if self.x == x and ((y - self.y) == 1):
                         MOVE_FLAG = True
+                        self.x = x 
+                        self.y = y
+                    else:
+                        MOVE_FLAG = False
+                    
                     
 
 class Rook(Piece):
     
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
-
+        
+    def move(self, x, y):
+        if self.color == 'black':
+            if (x, y) in white_position_list:
+                pass
+            
+                
 class Knight(Piece):
     
     def __init__(self, x, y, color):
