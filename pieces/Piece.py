@@ -79,11 +79,21 @@ class Knight(Piece):
     
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
+        
+    def move(self, x, y):
+        if self.color == 'black':
+            if (x, y) in white_position_list:
+                pass
 
 class Bishop(Piece):
     
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
+        
+    def move(self, x, y):
+        if self.color == 'black':
+            if (x, y) in white_position_list:
+                pass
         
 class Queen(Piece):
     
