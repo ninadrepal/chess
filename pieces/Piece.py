@@ -44,6 +44,7 @@ def kill_piece(x, y):
     KILL_FLAG = False
     try:
         piece_positions.pop(check_piece_at_position(x, y))
+        # kill the piece objects from the dictionary of objects created in the create_piece()
         KILL_FLAG = True
     except KeyError:
         print("No piece found to be killed")
@@ -169,33 +170,21 @@ def create_pieces():
 
     black_rook = {num + 1: Rook(x, 8, BLACK) for num, x in enumerate([1,8])}
     white_rook = {num + 1: Rook(x, 1, WHITE) for num, x in enumerate([1,8])}
-    
+
     black_knight = {num + 1: Knight(x, 8, BLACK) for num, x in enumerate([2,7])}
     white_knight = {num + 1: Knight(x, 1, WHITE) for num, x in enumerate([2,7])}
-    
-    print(black_rook[2].position)
 
-    
-    bb1 = Bishop(3, 8, 'black')
-    bb2 = Bishop(6, 8, 'black')
-    bw1 = Bishop(3, 1, 'white')
-    bw2 = Bishop(6, 1, 'white')
-    
-    knb1 = Knight(2, 8, 'black')
-    knb2 = Knight(7, 8, 'black')
-    knw1 = Knight(2, 1, 'white')
-    knw2 = Knight(7, 1, 'white')
-    
-    rb1 = Queen(4, 8, 'black')
-    rw1 = Queen(4, 1, 'white')
-    
-    kb1 = King(5, 8, 'black')
-    kw1 = King(5, 1, 'white')
-    
+    black_bishop = {num + 1: Bishop(x, 8, BLACK) for num, x in enumerate([3,6])}
+    white_bishop = {num + 1: Bishop(x, 1, WHITE) for num, x in enumerate([3,6])}
 
+    black_queen = Queen(4, 8, BLACK)
+    white_queen = Queen(4, 1, WHITE)
 
+    black_king = King(5, 8, BLACK)
+    white_king = King(5, 1, WHITE)
+    
 create_pieces()
-        
+
 class Board(object):
     def __init__(self,x, y):
         self.x = x
