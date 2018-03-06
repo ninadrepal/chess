@@ -12,6 +12,7 @@ move() : in the definition of this function, consider the following checks:
     by moving to the desired position
     iii)check if the active piece can move to the desired position
 """
+import itertools
 
 WHITE = 'white'
 BLACK = 'black'
@@ -44,6 +45,7 @@ def kill_piece(x, y):
     KILL_FLAG = False
     try:
         piece_positions.pop(check_piece_at_position(x, y))
+        # kill the piece objects from the dictionary of objects created in the create_piece()
         KILL_FLAG = True
     except KeyError:
         print("No piece found to be killed")
@@ -161,41 +163,33 @@ class King(Piece):
 
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
-
+    
+    
 
 def create_pieces():
+    global black_pawn, white_pawn, black_rook, white_rook, black_knight
+    global white_knight, black_bishop, white_bishop, black_queen, white_queen
+    global black_king, white_king
     black_pawn = {x: Pawn(x, 7, BLACK) for x in range(1, 9)}
     white_pawn = {x: Pawn(x, 2, WHITE) for x in range(1, 9)}
 
     black_rook = {num + 1: Rook(x, 8, BLACK) for num, x in enumerate([1,8])}
     white_rook = {num + 1: Rook(x, 1, WHITE) for num, x in enumerate([1,8])}
-    
+
     black_knight = {num + 1: Knight(x, 8, BLACK) for num, x in enumerate([2,7])}
     white_knight = {num + 1: Knight(x, 1, WHITE) for num, x in enumerate([2,7])}
-    
-    print(black_rook[2].position)
 
-    
-    bb1 = Bishop(3, 8, 'black')
-    bb2 = Bishop(6, 8, 'black')
-    bw1 = Bishop(3, 1, 'white')
-    bw2 = Bishop(6, 1, 'white')
-    
-    knb1 = Knight(2, 8, 'black')
-    knb2 = Knight(7, 8, 'black')
-    knw1 = Knight(2, 1, 'white')
-    knw2 = Knight(7, 1, 'white')
-    
-    rb1 = Queen(4, 8, 'black')
-    rw1 = Queen(4, 1, 'white')
-    
-    kb1 = King(5, 8, 'black')
-    kw1 = King(5, 1, 'white')
-    
+    black_bishop = {num + 1: Bishop(x, 8, BLACK) for num, x in enumerate([3,6])}
+    white_bishop = {num + 1: Bishop(x, 1, WHITE) for num, x in enumerate([3,6])}
 
+    black_queen = Queen(4, 8, BLACK)
+    white_queen = Queen(4, 1, WHITE)
 
+    black_king = King(5, 8, BLACK)
+    white_king = King(5, 1, WHITE)
+    
 create_pieces()
-        
+
 class Board(object):
     def __init__(self,x, y):
         self.x = x
@@ -203,6 +197,10 @@ class Board(object):
     
     def print_board(self):
         pass
+    
+    def init_positions(self, piece, x, y):
+        for x, y in [1,2,3][4,5,6]:
+            print(x,y)
     
 def print_board():
     print(u' \u265C    \u265E     \u265D    \u265B     \u265A    \u265D    \u265E     \u265B')
@@ -221,6 +219,10 @@ def print_board():
 
 # when you kill the piece remove the piece from the position list and the 
 # piece object dictionaries that are created herewith
-
-
+# x = [x for x in range(1,9)]
+# y = [y for y in range(1,9)]
+# for x, y in itertools.product[2[x]]
+#     (x,y)
+#     
+print(black_pawn[1].position)
 
