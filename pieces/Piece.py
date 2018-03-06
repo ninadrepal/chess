@@ -167,26 +167,34 @@ class King(Piece):
     
 
 def create_pieces():
+    
+    global white_pieces, black_pieces, all_pieces
     global black_pawn, white_pawn, black_rook, white_rook, black_knight
     global white_knight, black_bishop, white_bishop, black_queen, white_queen
-    global black_king, white_king
-    black_pawn = {x: Pawn(x, 7, BLACK) for x in range(1, 9)}
-    white_pawn = {x: Pawn(x, 2, WHITE) for x in range(1, 9)}
 
-    black_rook = {num + 1: Rook(x, 8, BLACK) for num, x in enumerate([1,8])}
-    white_rook = {num + 1: Rook(x, 1, WHITE) for num, x in enumerate([1,8])}
+    black_pawn = {'bp'+ str(x): Pawn(x, 7, BLACK) for x in range(1, 9)}
+    white_pawn = {'wp'+ str(x): Pawn(x, 2, WHITE) for x in range(1, 9)}
 
-    black_knight = {num + 1: Knight(x, 8, BLACK) for num, x in enumerate([2,7])}
-    white_knight = {num + 1: Knight(x, 1, WHITE) for num, x in enumerate([2,7])}
+    black_rook = {'br' + str(num + 1): Rook(x, 8, BLACK) for num, x in enumerate([1,8])}
+    white_rook = {'wr' + str(num + 1): Rook(x, 1, WHITE) for num, x in enumerate([1,8])}
 
-    black_bishop = {num + 1: Bishop(x, 8, BLACK) for num, x in enumerate([3,6])}
-    white_bishop = {num + 1: Bishop(x, 1, WHITE) for num, x in enumerate([3,6])}
+    black_knight = {'bkn' + str(num + 1): Knight(x, 8, BLACK) for num, x in enumerate([2,7])}
+    white_knight = {'wkn' + str(num + 1): Knight(x, 1, WHITE) for num, x in enumerate([2,7])}
 
-    black_queen = Queen(4, 8, BLACK)
-    white_queen = Queen(4, 1, WHITE)
+    black_bishop = {'bb' + str(num + 1): Bishop(x, 8, BLACK) for num, x in enumerate([3,6])}
+    white_bishop = {'wb' + str(num + 1): Bishop(x, 1, WHITE) for num, x in enumerate([3,6])}
 
-    black_king = King(5, 8, BLACK)
-    white_king = King(5, 1, WHITE)
+    black_queen = {'bq' + str(num + 1): Queen(x, 8, BLACK) for num, x in enumerate([4])}
+    white_queen = {'wq' + str(num + 1): Queen(x, 1, WHITE) for num, x in enumerate([4])}
+
+    black_king = {'bk' + str(num + 1): King(x, 8, BLACK) for num, x in enumerate([5])}
+    white_king = {'wk' + str(num + 1): King(x, 1, WHITE) for num, x in enumerate([5])}
+    
+    white_pieces = {**white_pawn, **white_king, **white_queen, **white_rook,
+                    **white_knight, **white_bishop}
+    black_pieces = {**black_pawn, **black_king, **black_queen, **black_rook,
+                    **black_knight, **black_bishop}
+    all_pieces = {**white_pieces, **black_pieces}
     
 create_pieces()
 
@@ -219,10 +227,25 @@ def print_board():
 
 # when you kill the piece remove the piece from the position list and the 
 # piece object dictionaries that are created herewith
-# x = [x for x in range(1,9)]
+xlist = [x for x in range(1,9)]
 # y = [y for y in range(1,9)]
-# for x, y in itertools.product[2[x]]
-#     (x,y)
-#     
-print(black_pawn[1].position)
+print(all_pieces)
+
+board_positions = {}
+for x, y in itertools.product(xlist,xlist):
+    board_positions[(x,y)] = None
+
+'''think logic below'''
+# for position in board_positions.keys():
+#     for piece in list(all_pieces.values()):
+# #         print(position)
+# #         print([piece.position for piece in list(all_pieces.values())])
+#         if position in [piece.position for piece in list(all_pieces.values())]:
+#             print(position)
+#             print(piece)
+#             board_positions[position] = piece
+#         else:
+#             board_positions[position] = None
+print(board_positions)
+    
 
