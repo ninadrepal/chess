@@ -4,6 +4,7 @@ Created on Feb 26, 2018
 
 @author: NREPAL
 '''
+from _operator import pos
 
 """
 move() : in the definition of this function, consider the following checks:
@@ -13,6 +14,8 @@ move() : in the definition of this function, consider the following checks:
     iii)check if the active piece can move to the desired position
 """
 import itertools
+import sys
+import pprint
 
 WHITE = 'white'
 BLACK = 'black'
@@ -86,6 +89,8 @@ class Pawn(Piece):
     
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
+        self.symbol = '\u265F' if self.color == BLACK else '\u2659'
+        
         
     def move(self, x, y):
         if self.color == 'black':
@@ -114,6 +119,7 @@ class Rook(Piece):
     
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
+        self.symbol = '\u265C' if self.color == BLACK else '\u2656'
         
     def move(self, x, y):
         if self.color == 'black':
@@ -126,6 +132,7 @@ class Knight(Piece):
     
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
+        self.symbol = '\u265E' if self.color == BLACK else '\u2658'
         
     def move(self, x, y):
         if self.color == 'black':
@@ -136,6 +143,7 @@ class Bishop(Piece):
     
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
+        self.symbol = '\u265D' if self.color == BLACK else '\u2657'
         
     def move(self, x, y):
         if self.color == 'black':
@@ -146,6 +154,7 @@ class Queen(Piece):
     
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
+        self.symbol = '\u265B' if self.color == BLACK else '\u2655'
         
     def move(self, x, y):
         if self.color == 'black':
@@ -163,6 +172,7 @@ class King(Piece):
 
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
+        self.symbol = '\u265A' if self.color == BLACK else '\u2654'
     
     
 
@@ -207,10 +217,10 @@ class Board(object):
         pass
     
     def init_positions(self, piece, x, y):
-        for x, y in [1,2,3][4,5,6]:
-            print(x,y)
+        pass
     
 def print_board():
+    board_list = [x for x in range(1,9)]
     print(u' \u265C    \u265E     \u265D    \u265B     \u265A    \u265D    \u265E     \u265B')
     print(u' \u265F    \u265F     \u265F    \u265F     \u265F    \u265F    \u265F     \u265F')
 #     print(u'\u25FB\u25FC\u25FB\u25FC\u25FB\u25FC\u25FB\u25FC ')
@@ -228,24 +238,36 @@ def print_board():
 # when you kill the piece remove the piece from the position list and the 
 # piece object dictionaries that are created herewith
 xlist = [x for x in range(1,9)]
+
+board_list = [x for x in range(1,9)]
+# print(list(itertools.product(board_list,repeat =  2)))
+
+    
+
 # y = [y for y in range(1,9)]
-print(all_pieces)
+
 
 board_positions = {}
 for x, y in itertools.product(xlist,xlist):
     board_positions[(x,y)] = None
+# print(board_positions.iterkeys())
+new_board_positions = {}
 
-'''think logic below'''
-# for position in board_positions.keys():
-#     for piece in list(all_pieces.values()):
-# #         print(position)
-# #         print([piece.position for piece in list(all_pieces.values())])
-#         if position in [piece.position for piece in list(all_pieces.values())]:
+for piece in all_pieces.items():
+    for position in board_positions.keys():
+        if piece[-1].position == position:
 #             print(position)
 #             print(piece)
-#             board_positions[position] = piece
-#         else:
-#             board_positions[position] = None
+            new_board_positions[position] = piece
+            break
+        else:
+            board_positions[position] = None
+        
+
+board_positions.update(new_board_positions)
+
 print(board_positions)
-    
+for z in reversed(range(1,9)):
+    print([board_positions[x][-1].symbol if board_positions[x] != None else '-' for x in itertools.product(board_list,repeat =  2) if x[-1] == z])
+
 
