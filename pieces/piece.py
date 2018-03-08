@@ -60,8 +60,6 @@ def check_for_check(self, x, y):
     pass
 
 
-                           
-
 WHITE = 'white'
 BLACK = 'black'
 ALIVE = 'alive'
@@ -102,33 +100,59 @@ class Pawn(Piece):
         
         
     def move(self, x, y):
-        if self.color == 'black':
-            if abs(x - self.x) <= 1:
-                #checks diagonal move
-                if board_positions[(x, y)] != None:
-                    if board_positions[(x, y)][-1].color == WHITE:
-                        if abs(y - self.y) == 1:
-                            KILL_FLAG = True
-                            board_positions[(x, y)][-1].status = KILLED
-                            MOVE_FLAG = True
-                            self.x = x
-                            self.y = y
-                            
-                        else:
-                            KILL_FLAG = False
-                            MOVE_FLAG = False
+        present_position = self.position
+        next_position = (x,y)
+        
+        if self.color == WHITE:
+            initial_move = True if present_position[-1] == 2 else False
+#             possible_white_moves = [(x-1, y+1),(x, y+1), (x+1, y+1)]
+            beginning_move = [(self.x, self.y+2)]
+            possible_kill_moves = [(self.x-1, self.y+1), (self.x+1, self.y+1)]
+            straight_move = [(self.x,self.y+1)]
+            
+            if board_positions[next_position] != None:
+                if board_positions[next_position][-1].color == BLACK:
+                    if next_position in possible_kill_moves:
+                        pass
                     else:
-                        KILL_FLAG = False
                         MOVE_FLAG = False
                 else:
-                    if self.x == x and ((y - self.y) == 1):
-                        MOVE_FLAG = True
-                        self.x = x 
-                        self.y = y
+                    MOVE_FLAG = False
+            else:# if no piece is present at the next position to be moved:                
+                if next_position in straight_move:
+                    self.position = next_position
+                    MOVE_FLAG = True
+                elif next_position in beginning_move and initial_move == True:
+                    self.position = next_position
+                    MOVE_FLAG = True
+                else:
+                    MOVE_FLAG = False
+                    
+        elif self.color == BLACK:
+            initial_move = True if present_position[-1] == 7 else False
+#             possible_white_moves = [(x-1, y+1),(x, y+1), (x+1, y+1)]
+            beginning_move = [(self.x, self.y-2)]
+            possible_kill_moves = [(self.x-1, self.y-1), (self.x+1, self.y-1)]
+            straight_move = [(self.x,self.y-1)]
+            
+            if board_positions[next_position] != None:
+                if board_positions[next_position][-1].color == WHITE:
+                    if next_position in possible_kill_moves:
+                        pass
                     else:
                         MOVE_FLAG = False
-                    
-                    
+                else:
+                    MOVE_FLAG = False
+            else:# if no piece is present at the next position to be moved:                
+                if next_position in straight_move:
+                    self.position = next_position
+                    MOVE_FLAG = True
+                elif next_position in beginning_move and initial_move == True:
+                    self.position = next_position
+                    MOVE_FLAG = True
+                else:
+                    MOVE_FLAG = False
+        return MOVE_FLAG
 
 class Rook(Piece):
     
@@ -219,26 +243,8 @@ class Board(object):
                    if x[-1] == z]
             )
 
-        
-    def print_board(self):
-        pass
-    
-    def init_positions(self, piece, x, y):
-        pass
-    
-# def print_board():
-#     print(u' \u265C    \u265E     \u265D    \u265B     \u265A    \u265D    \u265E     \u265B')
-#     print(u' \u265F    \u265F     \u265F    \u265F     \u265F    \u265F    \u265F     \u265F')
-# #     print(u'\u25FB\u25FC\u25FB\u25FC\u25FB\u25FC\u25FB\u25FC ')
-#     print(" -  -  -  -  -  -  -  -")
-#     print(" -  -  -  -  -  -  -  -")
-#     print(" -  -  -  -  -  -  -  -")
-#     print(" -  -  -  -  -  -  -  -")
-#     print(" -  -  -  -  -  -  -  -")
-#     print(u'\u2659    \u2659     \u2659    \u2659     \u2659    \u2659    \u2659     \u2659')
-#     print(u'\u2656    \u2658     \u2657    \u2655     \u2654    \u2657    \u2658     \u2656')
-#     
 
+    
 
 
 # when you kill the piece remove the piece from the position list and the 
@@ -268,20 +274,21 @@ def create_pieces():
 
     black_king = {'bk' + str(num + 1): King(x, 8, BLACK, ALIVE) for num, x in enumerate([5])}
     white_king = {'wk' + str(num + 1): King(x, 1, WHITE, ALIVE) for num, x in enumerate([5])}
-    
+
     white_pieces = {**white_pawn, **white_king, **white_queen, **white_rook,
                     **white_knight, **white_bishop}
     black_pieces = {**black_pawn, **black_king, **black_queen, **black_rook,
                     **black_knight, **black_bishop}
     all_pieces = {**white_pieces, **black_pieces}
-    
-    
-    
+
+
+
 create_pieces()
 
 board = Board()
 board.update_board()
 
-print(board_positions[(1,2)][-1].color)
-board_positions[(1,2)][-1].position = (3, 4)
+# print(board_positions[(1,2)][-1].color)
+piece = board_positions[(1,2)][-1]
+piece.move(1,4)
 board.update_board()
