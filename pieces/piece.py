@@ -16,6 +16,21 @@ move() : in the definition of this function, consider the following checks:
 import itertools
 
 
+WHITE = 'white'
+BLACK = 'black'
+ALIVE = 'alive'
+KILLED = 'killed'
+MOVE_FLAG = False
+KILL_FLAG = False
+black_position_list = []
+white_position_list = []
+black_killed_list = []
+white_killed_list = []
+piece_positions = {}
+board_positions = {}
+
+
+    
 
 def check_piece_at_position(x, y):
     position = (x, y)
@@ -29,6 +44,38 @@ def check_square_color(x, y):
     else:
         return 'white'
 
+def check_interruptions(present_position, next_position, available_moves, piece):
+    pass
+
+def available_moves(piece, present_position, next_position):
+    present_position = (x0, y0)
+    next_position = (x1, y1)
+    available_moves_list = []
+    if piece.__class__.__name__ == 'Rook':
+        if x0 == x1:
+            available_moves = [(x0, y0 + incr) if y1 > y0 else (x0, y0 - incr) for incr in range(1, abs(y0 - y1) + 1)]
+        else if y0 == y1
+            available_moves = [(x0 + incr, y0) if x1 > x0 else (x0 - incr, y0) for incr in range(1, abs(x0 - x1) + 1)]
+        else:
+            return "Invalid Move"
+    elif piece.__class__.__name__ == 'Bishop':
+        if abs(x1 - x0) == abs(y1- y0):
+            if y1 > y0 and x1 > x0:
+                available_moves_list = [(x0 + incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
+            elif y1> y0 and x1 < x0:
+                available_moves_list = [(x0 - incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
+            elif y1 < y0 and x1> x0:
+                available_moves_list = [(x0 + incr, y0 - incr) for incr in range(1, abs(y0 - y1) + 1)]
+            elif y1 < y0 and x1 < x0:
+                available_moves_list = [(x0 + incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
+            else:
+                return "Invalid Move"
+        else:
+            return "Invalid Move"
+        
+    elif piece.__class__.__name__ == 'Knight':
+        
+    
 def kill_piece(x, y):
     """
     check if (x,y) in white_position_list
@@ -60,21 +107,6 @@ def check_for_check(self, x, y):
     pass
 
 
-WHITE = 'white'
-BLACK = 'black'
-ALIVE = 'alive'
-KILLED = 'killed'
-MOVE_FLAG = False
-KILL_FLAG = False
-black_position_list = []
-white_position_list = []
-black_killed_list = []
-white_killed_list = []
-piece_positions = {}
-board_positions = {}
-
-
-    
 class Piece(object):
     '''
     classdocs
@@ -90,7 +122,6 @@ class Piece(object):
         self.color = color
         self.position = (x, y)
         self.status = status
-
 
 class Pawn(Piece):
     
@@ -161,9 +192,26 @@ class Rook(Piece):
         self.symbol = '\u265C' if self.color == BLACK else '\u2656'
         
     def move(self, x, y):
-        if self.color == 'black':
-            if (x, y) in white_position_list:
-                pass
+        present_position = self.position
+        next_position = (x,y)
+        
+        if self.color == WHITE:
+            possible_horizontal_moves = [(self.x + incr, self.y) for incr in range((self.x - 7),(9 - self.x)) if incr !=0]
+            possiblt_vertical_moves = [(self.x, self.y + incr) for incr in range((9-self.x),(self.x - 7)) if incr !=0]
+            if self.x == x:
+                positions_to_cover = [(self.x, y + incr) if y > self.y 
+                                     else (self.x, y - incr)
+                                     for incr in range(1, abs(self.y - y) + 1)]
+            elif self.y == y:
+                positions_to_cover = [(self.x + incr, y) if x > self.x 
+                                     else (self.x - incr, y)
+                                     for incr in range(1, abs(self.x - x) + 1)]
+            else:
+                MOVE_FLAG = False
+                
+            if board_positions[next_position] != None:
+                if next_position in possible_horizontal_moves:
+            
                 
             
                 
