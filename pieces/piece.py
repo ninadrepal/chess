@@ -45,36 +45,100 @@ def check_square_color(x, y):
         return 'white'
 
 def check_interruptions(present_position, next_position, available_moves, piece):
-    pass
-
-def available_moves(piece, present_position, next_position):
-    present_position = (x0, y0)
-    next_position = (x1, y1)
+    
+    """ check how many of the squares between the next pos
+    and the present pos are in the available pos list
+    """
+    (x0, y0) = present_position 
+    (x1, y1) = next_position
     available_moves_list = []
-    if piece.__class__.__name__ == 'Rook':
-        if x0 == x1:
-            available_moves = [(x0, y0 + incr) if y1 > y0 else (x0, y0 - incr) for incr in range(1, abs(y0 - y1) + 1)]
-        else if y0 == y1
-            available_moves = [(x0 + incr, y0) if x1 > x0 else (x0 - incr, y0) for incr in range(1, abs(x0 - x1) + 1)]
-        else:
-            return "Invalid Move"
-    elif piece.__class__.__name__ == 'Bishop':
-        if abs(x1 - x0) == abs(y1- y0):
-            if y1 > y0 and x1 > x0:
-                available_moves_list = [(x0 + incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
-            elif y1> y0 and x1 < x0:
-                available_moves_list = [(x0 - incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
-            elif y1 < y0 and x1> x0:
-                available_moves_list = [(x0 + incr, y0 - incr) for incr in range(1, abs(y0 - y1) + 1)]
-            elif y1 < y0 and x1 < x0:
-                available_moves_list = [(x0 + incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
-            else:
-                return "Invalid Move"
-        else:
-            return "Invalid Move"
+    available_rook_moves = []
+    if board_positions[]
+
+# def available_moves(piece, present_position, next_position):
+#     present_position = (x0, y0)
+#     next_position = (x1, y1)
+#     available_moves_list = []
+#     available_rook_moves = []
+#     available_bishop_moves = []
+#     if piece.__class__.__name__ == 'Rook':
+#         if x0 == x1:
+#             available_rook_moves = [(x0, y0 + incr) if y1 > y0 else (x0, y0 - incr) for incr in range(1, abs(y0 - y1) + 1)]
+#         else if y0 == y1
+#             available_rook_moves = [(x0 + incr, y0) if x1 > x0 else (x0 - incr, y0) for incr in range(1, abs(x0 - x1) + 1)]
+#         else:
+#             return "Invalid Move"
+#     elif piece.__class__.__name__ == 'Bishop':
+#         if abs(x1 - x0) == abs(y1- y0):
+#             if y1 > y0 and x1 > x0:
+#                 available_bishop_moves = [(x0 + incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
+#             elif y1> y0 and x1 < x0:
+#                 available_bishop_moves = [(x0 - incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
+#             elif y1 < y0 and x1> x0:
+#                 available_bishop_moves = [(x0 + incr, y0 - incr) for incr in range(1, abs(y0 - y1) + 1)]
+#             elif y1 < y0 and x1 < x0:
+#                 available_bishop_moves = [(x0 + incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
+#             else:
+#                 return "Invalid Move"
+#             available_moves_list = available_bishop_moves
+#         else:
+#             return "Invalid Move"
+#         
+#     elif piece.__class__.__name__ == 'Knight':
         
-    elif piece.__class__.__name__ == 'Knight':
+def available_rook_moves(present_position, next_position):
+    (x0, y0) = present_position 
+    (x1, y1) = next_position
+    available_moves_list = []
+    available_rook_moves = []
+    if x0 == x1:
+        return [(x0, y0 + incr) if y1 > y0 else (x0, y0 - incr) for incr in range(1, abs(y0 - y1) + 1)]
+    else if y0 == y1
+        return [(x0 + incr, y0) if x1 > x0 else (x0 - incr, y0) for incr in range(1, abs(x0 - x1) + 1)]
+    else:
+        return available_rook_moves
+
+def available_bishop_moves(present_position, next_position):
+    (x0, y0) = present_position 
+    (x1, y1) = next_position
+    available_moves_list = []
+    available_bishop_moves = []
+    if abs(x1 - x0) == abs(y1- y0):
+        if y1 > y0 and x1 > x0:
+            available_bishop_moves = [(x0 + incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
+        elif y1> y0 and x1 < x0:
+            available_bishop_moves = [(x0 - incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
+        elif y1 < y0 and x1> x0:
+            available_bishop_moves = [(x0 + incr, y0 - incr) for incr in range(1, abs(y0 - y1) + 1)]
+        elif y1 < y0 and x1 < x0:
+            available_bishop_moves = [(x0 + incr, y0 + incr) for incr in range(1, abs(y0 - y1) + 1)]
+            
+        available_moves_list = available_bishop_moves
+    else:
+        available_moves_list
         
+    return available_moves_list
+    
+def available_knight_moves(present_position, next_position):
+    (x0, y0) = present_position 
+    (x1, y1) = next_position
+    available_moves_list = [(x0 - 2, y0 + 1), (x0 - 1, y0 + 2), (x0 + 1, y0 + 2), (x0 + 2, y0 + 1), (x0 + 2, y0 - 1), (x0 + 1, y0 - 2), (x0 - 1, y0 - 2), (x0 - 2, y0 - 1)]
+    return available_moves_list
+
+def available_king_moves(present_position, next_position):
+    (x0, y0) = present_position 
+    (x1, y1) = next_position
+    available_moves_list = [(x0 - 1, y0),(x0 + 1, y0),(x0 - 1, y0 - 1), (x0 + 1, y0 + 1), (x0 - 1, y0 + 1), (x0 + 1, y0 - 1),(x0, y0 + 1),(x0, y0 - 1)]
+    
+def available_queen_moves(present_position, next_position):
+    (x0, y0) = present_position 
+    (x1, y1) = next_position
+    if abs(x1 - x0) == abs(y1- y0):
+        avaialble_queen_moves = available_bishop_moves(present_position, next_position)
+    else:
+        avaialble_queen_moves = available_rook_moves(present_position, next_position)
+    return available_queen_moves
+    
     
 def kill_piece(x, y):
     """
@@ -128,8 +192,8 @@ class Pawn(Piece):
     def __init__(self, x, y, color, status):
         super().__init__(x, y, color, status)
         self.symbol = '\u265F' if self.color == BLACK else '\u2659'
-        
-        
+
+
     def move(self, x, y):
         present_position = self.position
         next_position = (x,y)
