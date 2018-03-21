@@ -44,16 +44,27 @@ def check_square_color(x, y):
     else:
         return 'white'
 
-def check_interruptions(present_position, next_position, available_moves, piece):
+def check_interruptions(next_position, available_moves):
     
     """ check how many of the squares between the next pos
     and the present pos are in the available pos list
     """
-    (x0, y0) = present_position 
-    (x1, y1) = next_position
-    available_moves_list = []
-    available_rook_moves = []
-    if board_positions[]
+    """This function will NOT be applicable for Knight"""
+
+#     (x1, y1) = next_position
+# 
+#     for position in available_moves[0:available_moves.index(next_position)+1]:
+#         if board_positions[position][-1] is not None:
+#             return True
+#             break
+#         else:
+#             return True
+#     
+#     return MOVE_FLAG
+    return 1 in [1 if board_positions[position][-1] is None else 0 for position in available_moves[0:available_moves.index(next_position)+1]]
+# 0 if no piece on specified position. If no pieces in all positions then all zeros in the list. if all zeros that means no interruptions.
+# if 1 is in the list, then there are interruptions and hence it will return True.
+        
 
 # def available_moves(piece, present_position, next_position):
 #     present_position = (x0, y0)
@@ -93,7 +104,7 @@ def available_rook_moves(present_position, next_position):
     available_rook_moves = []
     if x0 == x1:
         return [(x0, y0 + incr) if y1 > y0 else (x0, y0 - incr) for incr in range(1, abs(y0 - y1) + 1)]
-    else if y0 == y1
+    elif y0 == y1:
         return [(x0 + incr, y0) if x1 > x0 else (x0 - incr, y0) for incr in range(1, abs(x0 - x1) + 1)]
     else:
         return available_rook_moves
@@ -258,38 +269,54 @@ class Rook(Piece):
     def move(self, x, y):
         present_position = self.position
         next_position = (x,y)
+        available_moves = self.available_moves(present_position, next_position)
+        if check_interruptions(next_position, available_moves) is False:
+            if kill_piece(x, y) is True:
+                pass
         
-        if self.color == WHITE:
-            possible_horizontal_moves = [(self.x + incr, self.y) for incr in range((self.x - 7),(9 - self.x)) if incr !=0]
-            possiblt_vertical_moves = [(self.x, self.y + incr) for incr in range((9-self.x),(self.x - 7)) if incr !=0]
-            if self.x == x:
-                positions_to_cover = [(self.x, y + incr) if y > self.y 
-                                     else (self.x, y - incr)
-                                     for incr in range(1, abs(self.y - y) + 1)]
-            elif self.y == y:
-                positions_to_cover = [(self.x + incr, y) if x > self.x 
-                                     else (self.x - incr, y)
-                                     for incr in range(1, abs(self.x - x) + 1)]
-            else:
-                MOVE_FLAG = False
-                
-            if board_positions[next_position] != None:
-                if next_position in possible_horizontal_moves:
-            
-                
-            
-                
+#         if self.color == WHITE:
+#             possible_horizontal_moves = [(self.x + incr, self.y) for incr in range((self.x - 7),(9 - self.x)) if incr !=0]
+#             possiblt_vertical_moves = [(self.x, self.y + incr) for incr in range((9-self.x),(self.x - 7)) if incr !=0]
+#             if self.x == x:
+#                 positions_to_cover = [(self.x, y + incr) if y > self.y 
+#                                      else (self.x, y - incr)
+#                                      for incr in range(1, abs(self.y - y) + 1)]
+#             elif self.y == y:
+#                 positions_to_cover = [(self.x + incr, y) if x > self.x 
+#                                      else (self.x - incr, y)
+#                                      for incr in range(1, abs(self.x - x) + 1)]
+#             else:
+#                 MOVE_FLAG = False
+# 
+#             if board_positions[next_position] != None:
+#                 if next_position in possible_horizontal_moves:
+#                     pass
+
+
+    def available_moves(self, present_position, next_position):
+        """Check Available Moves"""
+        (x0, y0) = present_position
+        (x1, y1) = next_position
+        available_rook_moves = []
+        if x0 == x1:
+            return [(x0, y0 + incr) if y1 > y0 else (x0, y0 - incr) for incr in range(1, abs(y0 - y1) + 1)]
+        elif y0 == y1:
+            return [(x0 + incr, y0) if x1 > x0 else (x0 - incr, y0) for incr in range(1, abs(x0 - x1) + 1)]
+        else:
+            return available_rook_moves
+
 class Knight(Piece):
     
     def __init__(self, x, y, color, status):
         super().__init__(x, y, color, status)
         self.symbol = '\u265E' if self.color == BLACK else '\u2658'
-        
+    
     def move(self, x, y):
         if self.color == 'black':
             if (x, y) in white_position_list:
                 pass
-
+        
+        
 class Bishop(Piece):
     
     def __init__(self, x, y, color, status):
@@ -399,8 +426,10 @@ create_pieces()
 
 board = Board()
 board.update_board()
+print('')
 
 # print(board_positions[(1,2)][-1].color)
 piece = board_positions[(1,2)][-1]
-piece.move(1,4)
+piece.move(1,3)
 board.update_board()
+print('')
