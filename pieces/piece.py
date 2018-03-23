@@ -6,8 +6,6 @@ Created on Feb 26, 2018
 '''
 import itertools
 import os
-import textwrap
-
 """
 move() : in the definition of this function, consider the following checks:
     i)check if there is any piece in the position specified
@@ -22,6 +20,7 @@ WHITE = 'White'
 BLACK = 'Black'
 ALIVE = 'Alive'
 KILLED = 'Killed'
+global MOVE_FLAG, KILL_FLAG
 MOVE_FLAG = False
 KILL_FLAG = False
 BOARD_POSITIONS = {}
@@ -33,18 +32,19 @@ def check_interruptions(piece, next_position, available_moves):
    This function will NOT be applicable for Knight
    """
 
-    interruptions = [1 if BOARD_POSITIONS[position][-1]
-                     is None else 0 for position
+    interruptions = [1 if BOARD_POSITIONS[position]
+                     is not None else 0 for position
                      in available_moves[
-                         0:available_moves.index(next_position)]
+                         0:available_moves.index(next_position)+1]
                      ]
 # 0 if no piece on specified position. If no pieces in all positions then all
 #  zeros in the list. if all zeros that means no interruptions.
 # if 1 is in the list, then there are interruptions and hence it will
 # return True.
+    global KILL_FLAG, MOVE_FLAG
     killed_piece = interruptions.pop()
     if 1 not in interruptions:
-        if kill_piece == 1:
+        if killed_piece == 1:
             KILL_FLAG = kill_piece(piece, next_position, piece.position)
             MOVE_FLAG = KILL_FLAG
         else:
@@ -65,10 +65,12 @@ def kill_piece(piece, next_position, present_position):
     If there is a check, revert the kill move and give kill flag as false
     
     """
-
+    global KILL_FLAG
+    global MOVE_FLAG
     try:
         #         piece_positions.pop(check_piece_at_position(x, y))
-        if piece.color != BOARD_POSITIONS[(1, 2)][-1].color:
+
+        if piece.color != BOARD_POSITIONS[next_position][-1].color:
             BOARD_POSITIONS[next_position][-1].status = KILLED
             piece.position = next_position
             if check_for_check(piece):
@@ -114,8 +116,7 @@ def check_for_check(self):
     check = False
     if self.color == WHITE:
         for _, piece in black_pieces.items():
-            if king_position in piece.available_moves(
-                    piece, piece.position, king_position):
+            if king_position in piece.available_moves(piece.position, king_position):
                 if not check_interruptions(
                     piece, king_position, piece.available_moves(
                         piece, piece.position)):
@@ -123,8 +124,7 @@ def check_for_check(self):
             break
     elif self.color == BLACK:
         for _, piece in white_pieces.items():
-            if king_position in piece.available_moves(
-                    piece, piece.position, king_position):
+            if king_position in piece.available_moves(piece.position, king_position):
                 if check_interruptions(
                     piece,
                     king_position,
@@ -159,6 +159,7 @@ class Pawn(Piece):
         self.symbol = '\u265F' if self.color == BLACK else '\u2659'
 
     def move(self, x, y):
+        (self.x, self.y) = self.position
         present_position = self.position
         next_position = (x, y)
 
@@ -213,9 +214,37 @@ class Pawn(Piece):
                     MOVE_FLAG = True
                 else:
                     MOVE_FLAG = False
-        return MOVE_FLAG
+        if MOVE_FLAG:
+            board.update_board()
+        else:
+            print("Invalid Move")
 
+            
+    def available_moves(self, present_position, next_position):
+        (x0, y0) = present_position
+        (x1, y1) = next_position
+        available_moves = []
+        if self.color == WHITE:
+            initial_move = True if present_position[-1] == 2 else False
+#             possible_white_moves = [(x-1, y+1),(x, y+1), (x+1, y+1)]
+            beginning_move = [(self.x, self.y + 2)]
+            possible_kill_moves = [
+                (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)]
+            straight_move = [(self.x, self.y + 1)]
+            available_moves = beginning_move + possible_kill_moves + straight_move
+        elif self.color == BLACK:
+            initial_move = True if present_position[-1] == 7 else False
+#             possible_white_moves = [(x-1, y+1),(x, y+1), (x+1, y+1)]
+            beginning_move = [(self.x, self.y - 2)]
+            possible_kill_moves = [
+                (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)]
+            straight_move = [(self.x, self.y - 1)]
+            available_moves = beginning_move + possible_kill_moves + straight_move
 
+        return available_moves
+        
+        
+        pass
 class Rook(Piece):
 
     def __init__(self, x, y, color, status):
@@ -229,9 +258,10 @@ class Rook(Piece):
         if no check then see available moves
         if there are no interruptions in the available moves
         """
+        global KILL_FLAG
         present_position = self.position
         next_position = (x, y)
-        if check_for_check(self):
+        if not check_for_check(self):
             available_moves = self.available_moves(present_position, next_position)
             MOVE_FLAG, KILL_FLAG = check_interruptions(self, next_position, available_moves)
         else:
@@ -405,14 +435,17 @@ class King(Piece):
 
 class Board(object):
     def __init__(self):
-        self.turn = WHITE
+        self.turn = BLACK
         pass
     
     def check_turn(self):
         """asdas"""
         if self.turn == WHITE:
+            
+            print('\n\n\nBlack to play...')
             self.turn = BLACK
         else:
+            print('\n\n\nWhite to play...')
             self.turn = WHITE
         return self.turn
             
@@ -433,14 +466,14 @@ class Board(object):
         for z in reversed(range(1, 9)):
             print('\n')
             for elem in [BOARD_POSITIONS[x][-1].symbol + '\t'
-                   if BOARD_POSITIONS[x] is not None else '-\t'
+                   if BOARD_POSITIONS[x] is not None else '\t'
                    for x in itertools.product(board_list, repeat=2)
                    if x[-1] == z]:
                        print(elem, end='')
                        
         
            
-        print('\n\n\n',self.check_turn(), 'to play.')
+        self.check_turn()
 
 
 # when you kill the piece remove the piece from the position list and the
@@ -489,38 +522,59 @@ def create_pieces():
     all_pieces = {**white_pieces, **black_pieces}
 
 
-create_pieces()
-
-board = Board()
-board.update_board()
-print('')
-
-# print(BOARD_POSITIONS[(1,2)][-1].color)
-piece_a = BOARD_POSITIONS[(1, 2)][-1]
-# piece.status = KILLED
-# print(piece_a.status)
-
-piece_a.move(1, 3)
+# create_pieces()
+# 
+# board = Board()
 # board.update_board()
-print('')
+# print('')
+# 
+# # print(BOARD_POSITIONS[(1,2)][-1].color)
+# piece_a = BOARD_POSITIONS[(1, 2)][-1]
+# 
+# # print(piece_a.status)
+# 
+# piece_a.move(1, 3)
+# board.update_board()
+# print('')
 
 
 # 
-# def main():
-#     create_pieces()
-#     board = Board()
-#     board.update_board()
-#     print('')
-#     
-#     # print(BOARD_POSITIONS[(1,2)][-1].color)
+def parse_input(user_input):
+    print(user_input)
+    init_pos, fin_pos = user_input.split(':')
+#     x0, y0 = init_pos
+#     x1, y1 = fin_pos
+#     print(init_pos)
+    x0, y0 = init_pos.split(',')
+    x1, y1 = fin_pos.split(',')
+#     print(type(x0))
+#     present_position = (x0, y0)
+#     next_position = (x1, y1)
+    BOARD_POSITIONS[(int(x0), int(y0))][-1].move(int(x1), int(y1))
+    
+def main():
+    create_pieces()
+    global board
+    global MOVE_FLAG, KILL_FLAG
+    board = Board()
+    board.update_board()
+    print('')
+    while True:
+        userinput = input('Please specify the start position and final position:\n\n')
+        
+        parse_input(userinput)
+
+    
+    
+     
+    
 #     piece_a = BOARD_POSITIONS[(1, 2)][-1]
-#     # piece.status = KILLED
-#     print(piece_a.status)
-#     
+# 
+#      
 #     piece_a.move(1, 3)
 #     board.update_board()
 #     print('')
-#     
-# if __name__ == main():
-#     main()
+     
+if __name__ == main():
+    main()
 #     
