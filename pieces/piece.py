@@ -122,10 +122,14 @@ def check_for_check(self):
     if self.color == WHITE:
         for _, piece in black_pieces.items():
             if king_position in piece.available_moves(piece.position, king_position):
-                MOVE_FLAG, KILL_FLAG = check_interruptions(piece, king_position, piece.available_moves(piece.position, king_position))
-                if MOVE_FLAG and KILL_FLAG is True:
-                    check = True
-                    break
+                if not isinstance(piece, Knight):
+                    MOVE_FLAG, KILL_FLAG = check_interruptions(piece, king_position, piece.available_moves(piece.position, king_position))
+                    if MOVE_FLAG and KILL_FLAG is True:
+                        check = True
+                        break
+                else:
+                    
+                    pass
     elif self.color == BLACK:
         for _, piece in white_pieces.items():
             if king_position in piece.available_moves(piece.position, king_position):
@@ -133,6 +137,8 @@ def check_for_check(self):
                 if MOVE_FLAG and KILL_FLAG is True:
                     check = True
                     break
+                else:
+                    pass
     return check
 
 
@@ -210,7 +216,7 @@ class Pawn(Piece):
         (self.x, self.y) = self.position
         present_position = self.position
         next_position = (x, y)
-
+        global MOVE_FLAG, KILL_FLAG
         if self.color == WHITE:
             initial_move = True if present_position[-1] == 2 else False
 #             possible_white_moves = [(x-1, y+1),(x, y+1), (x+1, y+1)]
@@ -222,17 +228,16 @@ class Pawn(Piece):
             if BOARD_POSITIONS[next_position] is not None:
                 if BOARD_POSITIONS[next_position][-1].color == BLACK:
                     if next_position in possible_kill_moves:
-                        pass
+                        kill_piece(self, next_position, present_position)
+                        MOVE_FLAG = KILL_FLAG
                     else:
                         MOVE_FLAG = False
                 else:
                     MOVE_FLAG = False
             else:  # if no piece is present at the next position to be moved:
                 if next_position in straight_move:
-                    self.position = next_position
                     MOVE_FLAG = True
                 elif next_position in beginning_move and initial_move:
-                    self.position = next_position
                     MOVE_FLAG = True
                 else:
                     MOVE_FLAG = False
@@ -248,24 +253,30 @@ class Pawn(Piece):
             if BOARD_POSITIONS[next_position] is not None:
                 if BOARD_POSITIONS[next_position][-1].color == WHITE:
                     if next_position in possible_kill_moves:
-                        pass
+                        kill_piece(self, next_position, present_position)
                     else:
                         MOVE_FLAG = False
                 else:
                     MOVE_FLAG = False
             else:  # if no piece is present at the next position to be moved:
                 if next_position in straight_move:
-                    self.position = next_position
                     MOVE_FLAG = True
                 elif next_position in beginning_move and initial_move:
-                    self.position = next_position
                     MOVE_FLAG = True
                 else:
                     MOVE_FLAG = False
-        if MOVE_FLAG:
-            board.update_board()
+                    
+        if MOVE_FLAG == True:
+            finalize_move(self, KILL_FLAG, MOVE_FLAG, next_position)
+            if check_for_check(self):
+                revert_move(self, present_position, next_position)
+                MOVE_FLAG = False
+                KILL_FLAG = False
+                print('Play a different Move. Its a CHECK!')
+            else:
+                board.update_board()
         else:
-            print("Invalid Move")
+            print("Invalid move for %s" %(self.__class__.__name__))
 
             
     def available_moves(self, present_position, next_position):
@@ -522,6 +533,8 @@ class Board(object):
                        print(elem, end='')
         print('\n\n')
         print('\t1\t2\t3\t4\t5\t6\t7\t8')
+        
+        self.check_turn()
             
 
 
@@ -594,13 +607,18 @@ def main():
     
     print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...\n")
     while True:
-        userinput = input('Please specify the start position and final position:\n\n')
-        userinput_list.append(userinput)
-        MOVE_FLAG = False,
-        KILL_FLAG = False
-        parse_input(userinput)
-        board.check_turn()
-
+        try:
+            userinput_list = ['5,2:5,4', '4,2:4,4', '4,1:4,2', '4,2:2,4', '4,7:4,5', '2,4:2,5', '2,8:3,6']
+            for input_ in userinput_list:
+                userinput = input_
+#             userinput = input('Please specify the start position and final position:\n\n')
+#             userinput_list.append(userinput)
+#             print(userinput_list)
+            MOVE_FLAG = False,
+            KILL_FLAG = False
+            parse_input(userinput)
+        except ValueError:
+            print("Please specify the user input correctly")
 
 if __name__ == main():
     main()
