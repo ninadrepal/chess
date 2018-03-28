@@ -201,7 +201,10 @@ class Piece(object):
                 revert_move(self, present_position, next_position)
                 MOVE_FLAG = False
                 KILL_FLAG = False
-                print('Play a different Move. Its a CHECK!')
+                if check_mate():
+                    print("Checkmate! Game Over!")
+                else:
+                    print('Play a different Move. Its a CHECK!')
             else:
                 board.update_board()
         else:
@@ -276,7 +279,10 @@ class Pawn(Piece):
                 revert_move(self, present_position, next_position)
                 MOVE_FLAG = False
                 KILL_FLAG = False
-                print('Play a different Move. Its a CHECK!')
+                if check_mate():
+                    print("Checkmate! Game Over!")
+                else:
+                    print('Play a different Move. Its a CHECK!')
             else:
                 board.update_board()
         else:
@@ -366,7 +372,10 @@ class Knight(Piece):
                 revert_move(self, present_position, next_position)
                 MOVE_FLAG = False
                 KILL_FLAG = False
-                print('Play a different Move. Its a CHECK!')
+                if check_mate():
+                    print("Checkmate! Game Over!")
+                else:
+                    print('Play a different Move. Its a CHECK!')
             else:
                 board.update_board()
         else:
@@ -483,19 +492,23 @@ class King(Piece):
     def available_moves(self, present_position, next_position):
         (x0, y0) = present_position
         (x1, y1) = next_position
-        available_moves = [(x0 -
-                            1, y0), (x0 +
-                                     1, y0), (x0 -
-                                              1, y0 -
-                                              1), (x0 +
-                                                   1, y0 +
-                                                   1), (x0 -
-                                                        1, y0 +
-                                                        1), (x0 +
-                                                             1, y0 -
-                                                             1), (x0, y0 +
-                                                                  1), (x0, y0 -
-                                                                       1)]
+        available_moves = []
+        if x0 == 8:
+            available_moves = [(x0 - 1, y0), (x0 - 1, y0 - 1),
+                            (x0 -  1, y0 + 1), (x0, y0 + 1), (x0, y0 - 1)]
+        elif x0 == 1:
+            available_moves = [ (x0 + 1, y0),  (x0 + 1, y0 + 1),
+                            (x0 + 1, y0 -  1), (x0, y0 + 1), (x0, y0 - 1)]
+        elif y0 == 1:
+            available_moves = [(x0 - 1, y0), (x0 + 1, y0),(x0 + 1, y0 + 1),
+                            (x0 -  1, y0 + 1),(x0, y0 + 1)]
+        elif y0 == 8:
+            available_moves = [(x0 - 1, y0), (x0 + 1, y0), (x0 - 1, y0 - 1), 
+                            (x0 + 1, y0 -  1), (x0, y0 - 1)]
+        else:
+            available_moves = [(x0 - 1, y0), (x0 + 1, y0), (x0 - 1, y0 - 1), 
+                            (x0 + 1, y0 -  1), (x0, y0 - 1),(x0, y0 + 1), (x0 + 1, y0 + 1), (x0 - 1, y0 + 1)]
+            
         return available_moves
 
 
@@ -541,7 +554,55 @@ class Board(object):
 # when you kill the piece remove the piece from the position list and the
 # piece object dictionaries that are created herewith
 
+def check_mate(self):
+    """check for check after the move is made. Then work on checkmate"""
+    check = False
+    checkmate_list=[]
+    (x0, y0) = self.position
+    available_moves = []
+    if x0 == 8:
+        available_moves = [(x0 - 1, y0), (x0 - 1, y0 - 1),
+                        (x0 -  1, y0 + 1), (x0, y0 + 1), (x0, y0 - 1)]
+    elif x0 == 1:
+        available_moves = [ (x0 + 1, y0),  (x0 + 1, y0 + 1),
+                        (x0 + 1, y0 -  1), (x0, y0 + 1), (x0, y0 - 1)]
+    elif y0 == 1:
+        available_moves = [(x0 - 1, y0), (x0 + 1, y0),(x0 + 1, y0 + 1),
+                        (x0 -  1, y0 + 1),(x0, y0 + 1)]
+    elif y0 == 8:
+        available_moves = [(x0 - 1, y0), (x0 + 1, y0), (x0 - 1, y0 - 1), 
+                        (x0 + 1, y0 -  1), (x0, y0 - 1)]
+    else:
+        available_moves = [(x0 - 1, y0), (x0 + 1, y0), (x0 - 1, y0 - 1), 
+                            (x0 + 1, y0 -  1), (x0, y0 - 1),(x0, y0 + 1), (x0 + 1, y0 + 1), (x0 - 1, y0 + 1)]
+            
+    if self.color == WHITE:
+        pieces = black_pieces.items()
+    else:
+        pieces = white_pieces.items()
+    
+    for move in available_moves:
+        if not BOARD_POSITIONS[move]:
+            if BOARD_POSITIONS[move][-1].color == self.color:
+                for _, piece in pieces:
+                    if move in piece.available_moves(piece.position, move):
+                        if not isinstance(piece, Knight):
+                            MOVE_FLAG, KILL_FLAG = check_interruptions(piece, move, piece.available_moves(piece.position, move))
+                            if MOVE_FLAG and KILL_FLAG is True:
+                                check = True
+                                break
+                        else:                    
+                            pass
+                checkmate_list.append(check)
+                """see what happens after killing the queen in the four move mate strategy.
+                it shoudl say checkmate because after killing the queen also it has check"""
 
+    
+    if False not in checkmate_list:
+        print(checkmate_list)
+        return True
+        
+    
 def create_pieces():
 
     global white_pieces, black_pieces, all_pieces
@@ -585,6 +646,7 @@ def create_pieces():
 
 
 def parse_input(user_input):
+    global MOVE_FLAG
     init_pos, fin_pos = user_input.split(':')
 #     x0, y0 = init_pos
 #     x1, y1 = fin_pos
@@ -594,10 +656,19 @@ def parse_input(user_input):
 #     print(type(x0))
 #     present_position = (x0, y0)
 #     next_position = (x1, y1)
-    piece = BOARD_POSITIONS[(int(x0), int(y0))][-1]
+    try:
+        piece = BOARD_POSITIONS[(int(x0), int(y0))][-1]
+    except TypeError:
+        print("No piece found to move")
     if board.turn == piece.color:
         piece.move(int(x1), int(y1))
-        board.turn = BLACK if piece.color == WHITE else WHITE
+        if MOVE_FLAG:
+            board.turn = BLACK if piece.color == WHITE else WHITE
+            if check_for_check(white_king['wk1'] if piece.color==BLACK else black_king['bk1']):
+                print("Its Check!")
+                if check_mate(white_king['wk1'] if piece.color==BLACK else black_king['bk1']):
+                    print("Its checkmate!!!")
+                
         print(board.turn, "to play...")
         
     else:
@@ -613,18 +684,19 @@ def main():
     userinput_list = []
     
     print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
-    while True:
+    while check_mate():
         try:
-#             userinput_list = ['5,2:5,4', '4,2:4,4', '4,1:4,2', '4,2:2,4', '4,7:4,5', '2,4:2,5', '2,8:3,6']
-#             for input_ in userinput_list:
-#                 userinput = input_
-            userinput = input('\nPlease specify the start position and final position:\n\n')
-            userinput_list.append(userinput)
+#             userinput_list = ['4,2:4,4', '4,7:4,5', '4,1:4,3', '8,7:8,5', '4,3:2,5', '3,8:5,6', '3,8:5,6']
+            userinput_list2 = ['5,2:5,4', '1,7:1,5', '6,1:3,4', '2,7:2,6', '4,1:6,3', '8,7:8,6', '6,3:6,7']
+            for input_ in userinput_list2:
+                userinput = input_
+#             userinput = input('\nPlease specify the start position and final position:\n\n')
+#             userinput_list.append(userinput)
             
-#                 print(userinput)
-            MOVE_FLAG = False,
-            KILL_FLAG = False
-            parse_input(userinput)
+                print(userinput)
+                MOVE_FLAG = False,
+                KILL_FLAG = False
+                parse_input(userinput)
         except ValueError:
             print("Please specify the user input correctly")
 
