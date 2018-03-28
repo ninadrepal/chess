@@ -186,7 +186,7 @@ class Piece(object):
         if there are no interruptions in the available moves
         """
         global KILL_FLAG
-        global MOVE_FLAG
+        global MOVE_FLAG, BOARD_POSITIONS
 
         if next_position in available_moves:
             MOVE_FLAG, KILL_FLAG = check_interruptions(self, next_position, available_moves)
@@ -195,6 +195,8 @@ class Piece(object):
 
         if MOVE_FLAG == True:
             finalize_move(self, KILL_FLAG, MOVE_FLAG, next_position)
+            BOARD_POSITIONS_BACKUP = board.update_board_positions()
+            BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
             if check_for_check(self):
                 revert_move(self, present_position, next_position)
                 MOVE_FLAG = False
@@ -216,7 +218,7 @@ class Pawn(Piece):
         (self.x, self.y) = self.position
         present_position = self.position
         next_position = (x, y)
-        global MOVE_FLAG, KILL_FLAG
+        global MOVE_FLAG, KILL_FLAG, BOARD_POSITIONS
         if self.color == WHITE:
             initial_move = True if present_position[-1] == 2 else False
 #             possible_white_moves = [(x-1, y+1),(x, y+1), (x+1, y+1)]
@@ -268,6 +270,8 @@ class Pawn(Piece):
                     
         if MOVE_FLAG == True:
             finalize_move(self, KILL_FLAG, MOVE_FLAG, next_position)
+            BOARD_POSITIONS_BACKUP = board.update_board_positions()
+            BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
             if check_for_check(self):
                 revert_move(self, present_position, next_position)
                 MOVE_FLAG = False
@@ -339,7 +343,7 @@ class Knight(Piece):
         self.symbol = '\u265E' if self.color == BLACK else '\u2658'
 
     def move(self, x, y):
-        global KILL_FLAG
+        global KILL_FLAG, BOARD_POSITIONS
         global MOVE_FLAG
         present_position = self.position
         next_position = (x, y)
@@ -356,6 +360,8 @@ class Knight(Piece):
         
         if MOVE_FLAG == True:
             finalize_move(self, KILL_FLAG, MOVE_FLAG, next_position)
+            BOARD_POSITIONS_BACKUP = board.update_board_positions()
+            BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
             if check_for_check(self):
                 revert_move(self, present_position, next_position)
                 MOVE_FLAG = False
@@ -495,23 +501,12 @@ class King(Piece):
 
 class Board(object):
     def __init__(self):
-        self.turn = BLACK
-        pass
-    
-    def check_turn(self):
-        """asdas"""
-        if self.turn == WHITE:
-            
-            print('\nBlack to play...')
-            self.turn = BLACK
-        else:
-            print('\nWhite to play...')
-            self.turn = WHITE
-        return self.turn
+        self.turn = WHITE
             
     
-    def update_board(self):
+    def update_board_positions(self):
         board_list = [x for x in range(1, 9)]
+        global BOARD_POSITIONS_BACKUP, BOARD_POSITIONS
         for x, y in itertools.product(board_list, board_list):
             BOARD_POSITIONS[(x, y)] = None
         new_board_positions = {}
@@ -522,7 +517,15 @@ class Board(object):
                     break
                 else:
                     BOARD_POSITIONS[position] = None
+        BOARD_POSITIONS_BACKUP = BOARD_POSITIONS
         BOARD_POSITIONS.update(new_board_positions)
+        return BOARD_POSITIONS_BACKUP
+    
+    
+    def update_board(self):
+        Board.update_board_positions(self)
+        board_list = [x for x in range(1, 9)]
+        global BOARD_POSITIONS
         for z in reversed(range(1, 9)):
             print('\n')
             print(z, end='\t')
@@ -534,9 +537,6 @@ class Board(object):
         print('\n\n')
         print('\t1\t2\t3\t4\t5\t6\t7\t8')
         
-        self.check_turn()
-            
-
 
 # when you kill the piece remove the piece from the position list and the
 # piece object dictionaries that are created herewith
@@ -594,7 +594,14 @@ def parse_input(user_input):
 #     print(type(x0))
 #     present_position = (x0, y0)
 #     next_position = (x1, y1)
-    BOARD_POSITIONS[(int(x0), int(y0))][-1].move(int(x1), int(y1))
+    piece = BOARD_POSITIONS[(int(x0), int(y0))][-1]
+    if board.turn == piece.color:
+        piece.move(int(x1), int(y1))
+        board.turn = BLACK if piece.color == WHITE else WHITE
+        print(board.turn, "to play...")
+        
+    else:
+        print("Its %s\'s turn! Play again." %(board.turn))
     
 def main():
     create_pieces()
@@ -605,15 +612,16 @@ def main():
     global userinput_list
     userinput_list = []
     
-    print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...\n")
+    print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
     while True:
         try:
-            userinput_list = ['5,2:5,4', '4,2:4,4', '4,1:4,2', '4,2:2,4', '4,7:4,5', '2,4:2,5', '2,8:3,6']
-            for input_ in userinput_list:
-                userinput = input_
-#             userinput = input('Please specify the start position and final position:\n\n')
-#             userinput_list.append(userinput)
-#             print(userinput_list)
+#             userinput_list = ['5,2:5,4', '4,2:4,4', '4,1:4,2', '4,2:2,4', '4,7:4,5', '2,4:2,5', '2,8:3,6']
+#             for input_ in userinput_list:
+#                 userinput = input_
+            userinput = input('\nPlease specify the start position and final position:\n\n')
+            userinput_list.append(userinput)
+            
+#                 print(userinput)
             MOVE_FLAG = False,
             KILL_FLAG = False
             parse_input(userinput)
