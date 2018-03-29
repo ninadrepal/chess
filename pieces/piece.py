@@ -27,16 +27,19 @@ BOARD_POSITIONS = {}
 
 
 def check_interruptions(piece, next_position, available_moves):
+    
     """ check how many of the squares between the next pos
     and the present pos are in the available pos list
    This function will NOT be applicable for Knight
    """
-   
-    interruptions = [1 if BOARD_POSITIONS[position]
+    if piece.__class__.__name__ not in ['Knight', 'King']:
+        interruptions = [1 if BOARD_POSITIONS[position]
                      is not None else 0 for position
                      in available_moves[
                          0:available_moves.index(next_position)+1]
                      ]
+    else:
+        interruptions = [0]
 # 0 if no piece on specified position. If no pieces in all positions then all
 #  zeros in the list. if all zeros that means no interruptions.
 # if 1 is in the list, then there are interruptions and hence it will
@@ -72,31 +75,13 @@ def kill_piece(piece, next_position, present_position):
             KILL_FLAG = True
         else:
             KILL_FLAG = False
-            
-        #         piece_positions.pop(check_piece_at_position(x, y))
-# 
-#         if piece.color != BOARD_POSITIONS[next_position][-1].color:
-#             BOARD_POSITIONS[next_position][-1].status = KILLED
-#             piece.position = next_position
-#             if check_for_check(piece):
-#                 BOARD_POSITIONS[next_position][-1].status = ALIVE
-#                 piece.position = present_position
-#                 KILL_FLAG = False
-#             else:
-#                 BOARD_POSITIONS[next_position][-1].status = ALIVE
-#                 piece.position = present_position
-#                 KILL_FLAG = True
-# 
-#         else:
-#             KILL_FLAG = False
-
     except KeyError:
         print("No piece found to be killed")
 
     return KILL_FLAG
 
 
-def check_for_check(self):
+def check_for_check(self, move = None):
     """
     check to see of the opposite color team gets a check after this move
     for eg: if the black color is playing a move, check to see if after the
@@ -112,33 +97,24 @@ def check_for_check(self):
         if there are interruptions return false
     if no --> return false
     """
+
     global white_king, black_king, black_pieces, white_pieces
     if self.color == WHITE:
-        king_position = white_king['wk1'].position
+        pieces = black_pieces.items()
+        king_position = white_king['wk1'].position if move is None else move
     else:
-        king_position = black_king['bk1'].position
+        pieces = white_pieces.items()
+        king_position = black_king['bk1'].position if move is None else move
 
     check = False
-    if self.color == WHITE:
-        for _, piece in black_pieces.items():
-            if king_position in piece.available_moves(piece.position, king_position):
-                if not isinstance(piece, Knight):
-                    MOVE_FLAG, KILL_FLAG = check_interruptions(piece, king_position, piece.available_moves(piece.position, king_position))
-                    if MOVE_FLAG and KILL_FLAG is True:
-                        check = True
-                        break
-                else:
-                    
-                    pass
-    elif self.color == BLACK:
-        for _, piece in white_pieces.items():
-            if king_position in piece.available_moves(piece.position, king_position):
+    for _, piece in pieces:
+        if king_position in piece.available_moves(piece.position, king_position):
+            if not isinstance(piece, Knight):
                 MOVE_FLAG, KILL_FLAG = check_interruptions(piece, king_position, piece.available_moves(piece.position, king_position))
                 if MOVE_FLAG and KILL_FLAG is True:
                     check = True
                     break
-                else:
-                    pass
+
     return check
 
 
@@ -160,8 +136,7 @@ def revert_move(piece, present_position, next_position):
     if BOARD_POSITIONS[next_position]:
         BOARD_POSITIONS[next_position][-1].status = ALIVE
     piece.position = present_position
-    
-    
+
 
 class Piece(object):
     '''
@@ -196,16 +171,15 @@ class Piece(object):
         if MOVE_FLAG == True:
             finalize_move(self, KILL_FLAG, MOVE_FLAG, next_position)
             BOARD_POSITIONS_BACKUP = board.update_board_positions()
-            BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
+            
             if check_for_check(self):
                 revert_move(self, present_position, next_position)
                 MOVE_FLAG = False
                 KILL_FLAG = False
-                if check_mate():
-                    print("Checkmate! Game Over!")
-                else:
-                    print('Play a different Move. Its a CHECK!')
+                print('Play a different Move. Its a CHECK!')
+                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
             else:
+                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
                 board.update_board()
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
@@ -274,19 +248,19 @@ class Pawn(Piece):
         if MOVE_FLAG == True:
             finalize_move(self, KILL_FLAG, MOVE_FLAG, next_position)
             BOARD_POSITIONS_BACKUP = board.update_board_positions()
-            BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
+            
             if check_for_check(self):
                 revert_move(self, present_position, next_position)
                 MOVE_FLAG = False
                 KILL_FLAG = False
-                if check_mate():
-                    print("Checkmate! Game Over!")
-                else:
-                    print('Play a different Move. Its a CHECK!')
+                print('Play a different Move. Its a CHECK!')
+                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
             else:
+                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
                 board.update_board()
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
+
 
             
     def available_moves(self, present_position, next_position):
@@ -367,19 +341,19 @@ class Knight(Piece):
         if MOVE_FLAG == True:
             finalize_move(self, KILL_FLAG, MOVE_FLAG, next_position)
             BOARD_POSITIONS_BACKUP = board.update_board_positions()
-            BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
+            
             if check_for_check(self):
                 revert_move(self, present_position, next_position)
                 MOVE_FLAG = False
                 KILL_FLAG = False
-                if check_mate():
-                    print("Checkmate! Game Over!")
-                else:
-                    print('Play a different Move. Its a CHECK!')
+                print('Play a different Move. Its a CHECK!')
+                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
             else:
+                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
                 board.update_board()
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
+
 
 
     def available_moves(self, present_position, next_position):
@@ -482,17 +456,45 @@ class King(Piece):
         super().__init__(x, y, color, status)
         self.symbol = '\u265A' if self.color == BLACK else '\u2654'
 
-    def move(self, x, y):
+    def move(self, x, y, checkmate=False):
 
+        global KILL_FLAG, BOARD_POSITIONS
+        global MOVE_FLAG
         present_position = self.position
         next_position = (x, y)
         available_moves = self.available_moves(present_position, next_position)
-        Piece.move(self, present_position, next_position, available_moves)
+        if next_position in available_moves:
+            if BOARD_POSITIONS[next_position] is None:
+                MOVE_FLAG = True
+            else:
+                KILL_FLAG = kill_piece(self, next_position, present_position)
+                MOVE_FLAG = KILL_FLAG
 
-    def available_moves(self, present_position, next_position):
+        else:
+            MOVE_FLAG = False
+        
+        if MOVE_FLAG == True:
+            finalize_move(self, KILL_FLAG, MOVE_FLAG, next_position)
+            BOARD_POSITIONS_BACKUP = board.update_board_positions()
+            
+            if check_for_check(self):
+                revert_move(self, present_position, next_position)
+                MOVE_FLAG = False
+                KILL_FLAG = False
+                print('Play a different Move. Its a CHECK!')
+                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
+            else:
+                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
+                board.update_board()
+        else:
+            print("Invalid move for %s" %(self.__class__.__name__))
+
+
+
+    def available_moves(self, present_position, next_position = None):
         (x0, y0) = present_position
-        (x1, y1) = next_position
-        available_moves = []
+        if next_position:
+            (x1, y1) = next_position
         if x0 == 8:
             available_moves = [(x0 - 1, y0), (x0 - 1, y0 - 1),
                             (x0 -  1, y0 + 1), (x0, y0 + 1), (x0, y0 - 1)]
@@ -508,8 +510,48 @@ class King(Piece):
         else:
             available_moves = [(x0 - 1, y0), (x0 + 1, y0), (x0 - 1, y0 - 1), 
                             (x0 + 1, y0 -  1), (x0, y0 - 1),(x0, y0 + 1), (x0 + 1, y0 + 1), (x0 - 1, y0 + 1)]
-            
         return available_moves
+
+def check_mate(king):
+    
+#     checkmate = True
+#     print(king.color)
+#     print(king.position)
+#     print(king.available_moves(king.position))
+    global KILL_FLAG, BOARD_POSITIONS
+    global MOVE_FLAG
+    present_position = king.position
+    for move in king.available_moves(king.position):
+        global KILL_FLAG, BOARD_POSITIONS
+        global MOVE_FLAG
+        present_position = king.position
+        next_position = move
+        available_moves = king.available_moves(present_position, next_position)
+        if next_position in available_moves:
+            if BOARD_POSITIONS[next_position] is None:
+                MOVE_FLAG = True
+            else:
+                KILL_FLAG = kill_piece(king, move, present_position)
+                MOVE_FLAG = KILL_FLAG
+
+        else:
+            MOVE_FLAG = False
+        
+        if MOVE_FLAG == True:
+            finalize_move(king, KILL_FLAG, MOVE_FLAG, move)
+            BOARD_POSITIONS_BACKUP = board.update_board_positions()
+            
+            if check_for_check(king):
+                revert_move(king, present_position, move)
+                MOVE_FLAG = False
+                KILL_FLAG = False
+                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
+                checkmate = True
+            else:
+                checkmate = False
+                break
+    
+    return checkmate
 
 
 class Board(object):
@@ -554,55 +596,7 @@ class Board(object):
 # when you kill the piece remove the piece from the position list and the
 # piece object dictionaries that are created herewith
 
-def check_mate(self):
-    """check for check after the move is made. Then work on checkmate"""
-    check = False
-    checkmate_list=[]
-    (x0, y0) = self.position
-    available_moves = []
-    if x0 == 8:
-        available_moves = [(x0 - 1, y0), (x0 - 1, y0 - 1),
-                        (x0 -  1, y0 + 1), (x0, y0 + 1), (x0, y0 - 1)]
-    elif x0 == 1:
-        available_moves = [ (x0 + 1, y0),  (x0 + 1, y0 + 1),
-                        (x0 + 1, y0 -  1), (x0, y0 + 1), (x0, y0 - 1)]
-    elif y0 == 1:
-        available_moves = [(x0 - 1, y0), (x0 + 1, y0),(x0 + 1, y0 + 1),
-                        (x0 -  1, y0 + 1),(x0, y0 + 1)]
-    elif y0 == 8:
-        available_moves = [(x0 - 1, y0), (x0 + 1, y0), (x0 - 1, y0 - 1), 
-                        (x0 + 1, y0 -  1), (x0, y0 - 1)]
-    else:
-        available_moves = [(x0 - 1, y0), (x0 + 1, y0), (x0 - 1, y0 - 1), 
-                            (x0 + 1, y0 -  1), (x0, y0 - 1),(x0, y0 + 1), (x0 + 1, y0 + 1), (x0 - 1, y0 + 1)]
-            
-    if self.color == WHITE:
-        pieces = black_pieces.items()
-    else:
-        pieces = white_pieces.items()
-    
-    for move in available_moves:
-        if not BOARD_POSITIONS[move]:
-            if BOARD_POSITIONS[move][-1].color == self.color:
-                for _, piece in pieces:
-                    if move in piece.available_moves(piece.position, move):
-                        if not isinstance(piece, Knight):
-                            MOVE_FLAG, KILL_FLAG = check_interruptions(piece, move, piece.available_moves(piece.position, move))
-                            if MOVE_FLAG and KILL_FLAG is True:
-                                check = True
-                                break
-                        else:                    
-                            pass
-                checkmate_list.append(check)
-                """see what happens after killing the queen in the four move mate strategy.
-                it shoudl say checkmate because after killing the queen also it has check"""
 
-    
-    if False not in checkmate_list:
-        print(checkmate_list)
-        return True
-        
-    
 def create_pieces():
 
     global white_pieces, black_pieces, all_pieces
@@ -646,8 +640,8 @@ def create_pieces():
 
 
 def parse_input(user_input):
-    global MOVE_FLAG
     init_pos, fin_pos = user_input.split(':')
+    global MOVE_FLAG
 #     x0, y0 = init_pos
 #     x1, y1 = fin_pos
 #     print(init_pos)
@@ -656,20 +650,22 @@ def parse_input(user_input):
 #     print(type(x0))
 #     present_position = (x0, y0)
 #     next_position = (x1, y1)
-    try:
-        piece = BOARD_POSITIONS[(int(x0), int(y0))][-1]
-    except TypeError:
-        print("No piece found to move")
-    if board.turn == piece.color:
+    piece = BOARD_POSITIONS[(int(x0), int(y0))][-1]
+    if board.turn == piece.color :
         piece.move(int(x1), int(y1))
+        print(MOVE_FLAG)
         if MOVE_FLAG:
             board.turn = BLACK if piece.color == WHITE else WHITE
             if check_for_check(white_king['wk1'] if piece.color==BLACK else black_king['bk1']):
-                print("Its Check!")
-                if check_mate(white_king['wk1'] if piece.color==BLACK else black_king['bk1']):
-                    print("Its checkmate!!!")
-                
-        print(board.turn, "to play...")
+                checkmate = check_mate(white_king['wk1'] if piece.color==BLACK else black_king['bk1'])
+                if checkmate:
+                    print("Checkmate !!!")
+                    print(piece.color, 'wins!')
+                else:
+                    print("Its Check!")
+                    print(board.turn, "to play...")
+        else:
+            print(board.turn, "to play...")
         
     else:
         print("Its %s\'s turn! Play again." %(board.turn))
@@ -684,16 +680,16 @@ def main():
     userinput_list = []
     
     print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
-    while check_mate():
+    while True:
         try:
-#             userinput_list = ['4,2:4,4', '4,7:4,5', '4,1:4,3', '8,7:8,5', '4,3:2,5', '3,8:5,6', '3,8:5,6']
-            userinput_list2 = ['5,2:5,4', '1,7:1,5', '6,1:3,4', '2,7:2,6', '4,1:6,3', '8,7:8,6', '6,3:6,7']
-            for input_ in userinput_list2:
+            userinput_list = ['5,2:5,4', '1,7:1,6', '4,1:6,3', 
+                    '1,6:1,5', '6,1:3,4', '1,5:1,4', '6,3:6,7']
+            for input_ in userinput_list:
                 userinput = input_
 #             userinput = input('\nPlease specify the start position and final position:\n\n')
 #             userinput_list.append(userinput)
             
-                print(userinput)
+#                 print(userinput)
                 MOVE_FLAG = False,
                 KILL_FLAG = False
                 parse_input(userinput)
