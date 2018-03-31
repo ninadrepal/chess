@@ -171,7 +171,7 @@ class Pawn(Piece):
             if BOARD_POSITIONS[next_position] is not None:
                 if BOARD_POSITIONS[next_position][-1].color == BLACK:
                     if next_position in possible_kill_moves:
-                        kill_piece(self, next_position)
+                        KILL_FLAG = kill_piece(self, next_position)
                         MOVE_FLAG = KILL_FLAG
                     else:
                         MOVE_FLAG = False
@@ -195,7 +195,7 @@ class Pawn(Piece):
             if BOARD_POSITIONS[next_position] is not None:
                 if BOARD_POSITIONS[next_position][-1].color == WHITE:
                     if next_position in possible_kill_moves:
-                        kill_piece(self, next_position)
+                        KILL_FLAG = kill_piece(self, next_position)
                     else:
                         MOVE_FLAG = False
                 else:
@@ -602,29 +602,34 @@ def parse_input(user_input):
     global MOVE_FLAG, checkmate
     x0, y0 = init_pos.split(',')
     x1, y1 = fin_pos.split(',')
-    piece = BOARD_POSITIONS[(int(x0), int(y0))][-1]
-    if board.turn == piece.color :
-        piece.move(int(x1), int(y1))
-        if MOVE_FLAG:
-            board.turn = BLACK if piece.color == WHITE else WHITE
-            if check_for_check(white_king['wk1'] if piece.color == BLACK
-                               else black_king['bk1']):
-                checkmate = check_mate(white_king['wk1'] if piece.color == BLACK
-                                       else black_king['bk1'], piece)
-                if checkmate:
-                    print("Checkmate !!!")
-                    print(piece.color, 'wins!')
-                    print("You may now ask %s to kindly fuck off :-)" %(board.turn))
+    try:
+        piece = BOARD_POSITIONS[(int(x0), int(y0))][-1]
+
+        if board.turn == piece.color :
+            piece.move(int(x1), int(y1))
+            if MOVE_FLAG:
+                board.turn = BLACK if piece.color == WHITE else WHITE
+                if check_for_check(white_king['wk1'] if piece.color == BLACK
+                                   else black_king['bk1']):
+                    checkmate = check_mate(white_king['wk1'] if piece.color == BLACK
+                                           else black_king['bk1'], piece)
+                    if checkmate:
+                        print("Checkmate !!!")
+                        print(piece.color, 'wins!')
+                        print("You may now ask %s to kindly fuck off :-)" %(board.turn))
+                    else:
+                        print("Its Check!")
+                        print(board.turn, "to play...")
                 else:
-                    print("Its Check!")
-                    print(board.turn, "to play...")
+                    print("\n%s to play..." %(board.turn))
             else:
                 print("\n%s to play..." %(board.turn))
+    
         else:
-            print("\n%s to play..." %(board.turn))
-
-    else:
-        print("Its %s\'s turn! Play again." %(board.turn))
+            print("Its %s\'s turn! Play again." %(board.turn))
+    
+    except TypeError:
+        print("No piece on the specified position")
 
 
 def main():
@@ -644,18 +649,19 @@ def main():
 #                     '1,6:1,5', '6,1:3,4', '1,5:1,4', '8,1:8,4','6,3:6,7']
 #             userinput_list2 = ['5,2:5,4', '3,7:3,5','7,1:6,3', '5,7:5,5', '6,3:5,5', '4,8:6,6',
 #                                 '5,5:4,7','5,8:4,7', '5,4:5,5', '6,6:5,5']
-#             for input_ in userinput_list2:
-#                 userinput = input_
-            userinput = input('\nPlease specify the start position and final position:\n\n')
-            userinput_list.append(userinput)
+            userinput_list3 =['3,2:3,4', '5,7:5,5', '4,2:4,3', '7,2:7,4', '6,7:5,6', '4,7:4,5', '3,4:4,5', '3,4:4,5']
+            for input_ in userinput_list3:
+                userinput = input_
+#             userinput = input('\nPlease specify the start position and final position:\n\n')
+#             userinput_list.append(userinput)
             
-#                 print(userinput)
-            MOVE_FLAG = False,
-            KILL_FLAG = False
-            parse_input(userinput)
-            if checkmate:
-                break
-#             break
+                print(userinput_list)
+                MOVE_FLAG = False,
+                KILL_FLAG = False
+                parse_input(userinput)
+                if checkmate:
+                    break
+            break
         except ValueError:
             print("Please specify the user input correctly")
 
