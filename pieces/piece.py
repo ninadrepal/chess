@@ -15,7 +15,8 @@ BOARD_POSITIONS = {}
 
 
 def check_interruptions(piece, next_position, available_moves):
-    """Checks if there are any pieces on the positions between start and
+    """
+    Checks if there are any pieces on the positions between start and
     final moves. This does not hold true for Knight and King as there are
     no positions between King start and final move. And Knight has no effect
     if there are pieces in between
@@ -91,26 +92,32 @@ def finalize_move(piece, kill_flag, next_position):
     Finalizes the move of the respective pieces and updates the board position
     and the piece position
     """
+    global white_king, black_king, BOARD_POSITIONS
+    present_position = piece.position
     if kill_flag:
-        BOARD_POSITIONS[next_position][-1].status = KILLED
+        target_kill_piece = BOARD_POSITIONS[next_position][-1]
+        target_kill_piece.status = KILLED
     piece.position = next_position
+    board.update_board_positions()
+    if check_for_check(white_king['wk1'] if piece.color == WHITE else black_king['bk1']):
+        if kill_flag:
+            target_kill_piece.status = ALIVE
+        piece.position = present_position
+        BOARD_POSITIONS = board.update_board_positions()
+        MOVE_FLAG = False
+        KILL_FLAG = False
+        print('Play a different Move. Its a CHECK!')
+        return False
+    else:
+        board.update_board()
+        return True
 
-
-def revert_move(piece, present_position, next_position):
-    """
-    Reverts everything done in the finalize move method
-    """
-
-    if BOARD_POSITIONS[next_position]:
-        BOARD_POSITIONS[next_position][-1].status = ALIVE
-    piece.position = present_position
 
 
 class Piece(object):
     """
-    classdocs
+    Common class for most pieces
     """
-
     def __init__(self, x, y, color, status):
         """
         Constructor
@@ -133,19 +140,8 @@ class Piece(object):
         else:
             MOVE_FLAG = False
 
-        if MOVE_FLAG == True:
+        if MOVE_FLAG:
             finalize_move(self, KILL_FLAG, next_position)
-            BOARD_POSITIONS_BACKUP = board.update_board_positions()
-
-            if check_for_check(self):
-                revert_move(self, present_position, next_position)
-                MOVE_FLAG = False
-                KILL_FLAG = False
-                print('Play a different Move. Its a CHECK!')
-                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
-            else:
-                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
-                board.update_board()
         else:
             print("Invalid move for %s" % (self.__class__.__name__))
 
@@ -208,19 +204,8 @@ class Pawn(Piece):
                 else:
                     MOVE_FLAG = False
 
-        if MOVE_FLAG == True:
+        if MOVE_FLAG:
             finalize_move(self, KILL_FLAG, next_position)
-            BOARD_POSITIONS_BACKUP = board.update_board_positions()
-
-            if check_for_check(self):
-                revert_move(self, present_position, next_position)
-                MOVE_FLAG = False
-                KILL_FLAG = False
-                print('Play a different Move. Its a CHECK!')
-                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
-            else:
-                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
-                board.update_board()
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
 
@@ -303,17 +288,6 @@ class Knight(Piece):
         
         if MOVE_FLAG == True:
             finalize_move(self, KILL_FLAG, next_position)
-            BOARD_POSITIONS_BACKUP = board.update_board_positions()
-            
-            if check_for_check(self):
-                revert_move(self, present_position, next_position)
-                MOVE_FLAG = False
-                KILL_FLAG = False
-                print('Play a different Move. Its a CHECK!')
-                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
-            else:
-                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
-                board.update_board()
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
 
@@ -439,17 +413,6 @@ class King(Piece):
         
         if MOVE_FLAG == True:
             finalize_move(self, KILL_FLAG, next_position)
-            BOARD_POSITIONS_BACKUP = board.update_board_positions()
-            
-            if check_for_check(self):
-                revert_move(self, present_position, next_position)
-                MOVE_FLAG = False
-                KILL_FLAG = False
-                print('Play a different Move. Its a CHECK!')
-                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
-            else:
-                BOARD_POSITIONS = BOARD_POSITIONS_BACKUP
-                board.update_board()
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
 
@@ -474,47 +437,73 @@ class King(Piece):
 
 def check_mate(king, piece):
 
-    global KILL_FLAG, BOARD_POSITIONS, checkmate
+    global KILL_FLAG, BOARD_POSITIONS, checkmate, board_positions_backup
     global MOVE_FLAG
     empty_positions = []
-    present_position = king.position
+    checks = []
     pieces = white_pieces.items() if king.color == WHITE else black_pieces.items()
+    opp_pieces = white_pieces.items() if king.color == BLACK else black_pieces.items()
     for move in king.available_moves(king.position):
-        next_position = move
-        available_moves = king.available_moves(present_position, next_position)
-        if next_position in available_moves:
-            if BOARD_POSITIONS[next_position] is None:
-                empty_positions.append(next_position)
-                MOVE_FLAG = True
-            else:
-                KILL_FLAG = kill_piece(king, next_position)
-                MOVE_FLAG = KILL_FLAG
-
+        if BOARD_POSITIONS[move] is None:
+            empty_positions.append(move)
         else:
-            MOVE_FLAG = False
-        # if the check is been given by knight, then ignore the below block
-        for position in empty_positions:
-            for _, piece_ in pieces:
-                if piece_.status == ALIVE:
-                    if position in piece_.available_moves(piece_.position, position):
-                        MOVE_FLAG = False
-                        break
-            
-        if MOVE_FLAG:
-            finalize_move(king, KILL_FLAG, move)
-            board_positions_backup = board.update_board_positions()
-
-            if check_for_check(king):
-                revert_move(king, present_position, move)
-                MOVE_FLAG = False
-                KILL_FLAG = False
-                BOARD_POSITIONS = board_positions_backup
-                checkmate = True
+            if kill_piece(king, move):
+                empty_positions.append(move)
             else:
-                checkmate = False
-                break
-
-    return checkmate
+                MOVE_FLAG = KILL_FLAG
+        # if the check is been given by knight, then ignore the below block
+        
+        # the below block will test if there are empty positions which can be
+        # filled with other pieces of the same color of king.color so that the check
+        # can be avoided by interruption the path through which a check is given
+    if empty_positions:
+        if not isinstance(piece, Knight):
+            for position in empty_positions:
+                for _, piece_ in pieces:
+                    if not isinstance(piece_, King):
+                        if piece_.status == ALIVE:
+                            if position in piece_.available_moves(piece_.position, position):
+                                if position in piece.available_moves(piece.position, position):
+                                    MOVE_FLAG = False
+                                    checkmate = False
+                                    break
+                                else:
+                                    MOVE_FLAG, KILL_FLAG = check_interruptions(piece_, position, piece_.available_moves(piece_.position, position))
+                                    if MOVE_FLAG:
+                                        pres_position = piece_.position
+                                        finalize_move(piece_, KILL_FLAG, position)
+                                        board_positions_backup = board.update_board_positions()
+                                # need to sort the following block in the finalize function
+                                        if check_for_check(king):
+#                                             revert_move(piece_, pres_position, position)
+                                            MOVE_FLAG = False
+                                            KILL_FLAG = False
+                                            BOARD_POSITIONS = board_positions_backup
+                                            checks.append(True)
+                                        else:
+                                            BOARD_POSITIONS = board_positions_backup
+                                            board.update_board()
+                                            checks.append(False)
+    
+#     
+#     if MOVE_FLAG:
+#         finalize_move(king, KILL_FLAG, move)
+#         board_positions_backup = board.update_board_positions()
+# 
+#         if check_for_check(king):
+#             revert_move(king, king.position, move)
+#             MOVE_FLAG = False
+#             KILL_FLAG = False
+#             BOARD_POSITIONS = board_positions_backup
+#             checkmate = True
+#         else:
+#             checkmate = False
+#             
+#     print("checkmate: ",checkmate)
+    if False not in checks:
+        return True
+    else:
+        return False
 
 
 class Board(object):
@@ -645,17 +634,18 @@ def main():
     print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
     while True:
         try:
-#             userinput_list = ['5,2:5,4', '1,7:1,6', '4,1:6,3', 
-#                     '1,6:1,5', '6,1:3,4', '1,5:1,4', '8,1:8,4','6,3:6,7']
+            userinput_list = ['5,2:5,4', '1,7:1,6', '4,1:6,3', 
+                    '1,6:1,5', '6,1:3,4', '1,5:1,4', '8,1:8,4','6,3:6,7']
 #             userinput_list2 = ['5,2:5,4', '3,7:3,5','7,1:6,3', '5,7:5,5', '6,3:5,5', '4,8:6,6',
 #                                 '5,5:4,7','5,8:4,7', '5,4:5,5', '6,6:5,5']
-            userinput_list3 =['3,2:3,4', '5,7:5,5', '4,2:4,3', '7,2:7,4', '6,7:5,6', '4,7:4,5', '3,4:4,5', '3,4:4,5']
-            for input_ in userinput_list3:
+#             userinput_list3 =['3,2:3,4', '5,7:5,5', '4,2:4,3', '7,2:7,4', '6,7:5,6', '4,7:4,5', '3,4:4,5', '3,4:4,5']
+            userinput_list4 = ['5,2:5,4', '5,7:5,5', '7,1:6,3', '6,8:5,7', '6,3:5,5', '6,7:6,6', '4,1:8,5', '5,8:6,8', '8,5:6,7']
+            for input_ in userinput_list4:
                 userinput = input_
 #             userinput = input('\nPlease specify the start position and final position:\n\n')
 #             userinput_list.append(userinput)
             
-                print(userinput_list)
+                print(userinput)
                 MOVE_FLAG = False,
                 KILL_FLAG = False
                 parse_input(userinput)
