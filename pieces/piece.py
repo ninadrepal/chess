@@ -29,7 +29,11 @@ def check_interruptions(piece, next_position, available_moves):
                          0:available_moves.index(next_position) + 1]
                          ]
     else:
-        interruptions = [0]
+        if BOARD_POSITIONS[next_position]:
+            if BOARD_POSITIONS[next_position][-1].color != piece.color:
+                return True, True
+        else:
+            return True, False
 
     killed_piece = interruptions.pop()
     if 1 not in interruptions:
@@ -49,7 +53,9 @@ def kill_piece(piece, next_position):
     Checks if the piece on the final position can be killed by the piece on
     the start position
     """
-
+    # try to see if you can write the code in such a way that this method would
+    # also be implemented if the next_position is blank. It should return false
+    # if the next position is blank
     try:
         if piece.color != BOARD_POSITIONS[next_position][-1].color:
             kill_flag = True
@@ -75,19 +81,21 @@ def check_for_check(self, move=None):
 
     check = False
     for _, piece in pieces:
-        if king_pos in piece.available_moves(piece.position, king_pos):
-            if not isinstance(piece, Knight):
+        if piece.status == ALIVE:
+            if king_pos in piece.available_moves(piece.position, king_pos):
+#                 if not isinstance(piece, Knight):
                 if check_interruptions(piece, king_pos,
                                        piece.available_moves(
                                            piece.position,
                                            king_pos)) == (True, True):
-                    check = True
-                    break
+                    return True
+
+                    
 
     return check
 
 
-def finalize_move(piece, kill_flag, next_position):
+def finalize_move(piece, kill_flag, next_position, checkmate=False):
     """
     Finalizes the move of the respective pieces and updates the board position
     and the piece position
@@ -106,10 +114,15 @@ def finalize_move(piece, kill_flag, next_position):
         BOARD_POSITIONS = board.update_board_positions()
         MOVE_FLAG = False
         KILL_FLAG = False
-        print('Play a different Move. Its a CHECK!')
         return False
     else:
-        board.update_board()
+        if checkmate:
+            if kill_flag:
+                target_kill_piece.status = ALIVE
+            piece.position = present_position
+            BOARD_POSITIONS = board.update_board_positions()
+            MOVE_FLAG = False
+            KILL_FLAG = False
         return True
 
 
@@ -141,7 +154,10 @@ class Piece(object):
             MOVE_FLAG = False
 
         if MOVE_FLAG:
-            finalize_move(self, KILL_FLAG, next_position)
+            if finalize_move(self, KILL_FLAG, next_position):
+                board.update_board()
+            else:
+                print('Play a different Move. Its a CHECK!')
         else:
             print("Invalid move for %s" % (self.__class__.__name__))
 
@@ -205,7 +221,10 @@ class Pawn(Piece):
                     MOVE_FLAG = False
 
         if MOVE_FLAG:
-            finalize_move(self, KILL_FLAG, next_position)
+            if finalize_move(self, KILL_FLAG, next_position):
+                board.update_board()
+            else:
+                print('Play a different Move. Its a CHECK!')
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
 
@@ -282,12 +301,14 @@ class Knight(Piece):
             else:
                 KILL_FLAG = kill_piece(self, next_position)
                 MOVE_FLAG = KILL_FLAG
-
         else:
             MOVE_FLAG = False
-        
-        if MOVE_FLAG == True:
-            finalize_move(self, KILL_FLAG, next_position)
+
+        if MOVE_FLAG:
+            if finalize_move(self, KILL_FLAG, next_position):
+                board.update_board()
+            else:
+                print('Play a different Move. Its a CHECK!')
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
 
@@ -412,7 +433,10 @@ class King(Piece):
             MOVE_FLAG = False
         
         if MOVE_FLAG == True:
-            finalize_move(self, KILL_FLAG, next_position)
+            if finalize_move(self, KILL_FLAG, next_position):
+                board.update_board()
+            else:
+                print('Play a different Move. Its a CHECK!')
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
 
@@ -440,19 +464,28 @@ def check_mate(king, piece):
     global KILL_FLAG, BOARD_POSITIONS, checkmate, board_positions_backup
     global MOVE_FLAG
     empty_positions = []
-    checks = []
     pieces = white_pieces.items() if king.color == WHITE else black_pieces.items()
-    opp_pieces = white_pieces.items() if king.color == BLACK else black_pieces.items()
     for move in king.available_moves(king.position):
         if BOARD_POSITIONS[move] is None:
-            empty_positions.append(move)
+            # the following block checks if there is an empty position and if
+            # the king moves to that position, will it still be a check for the
+            # king if no, that means, that there is a position where the king
+            # can avoid check and hence checkmate, so return false
+            if finalize_move(king, KILL_FLAG, move, checkmate=True):
+                return False
+            else:
+                empty_positions.append(move)
         else:
             if kill_piece(king, move):
-                empty_positions.append(move)
-            else:
-                MOVE_FLAG = KILL_FLAG
-        # if the check is been given by knight, then ignore the below block
-        
+                if finalize_move(king, kill_piece(king, move), move, 
+                                 checkmate = True):
+                    
+                    return False
+                else:
+                    empty_positions.append(move)
+
+        # if the check is been given by knight or king, then ignore the below block
+
         # the below block will test if there are empty positions which can be
         # filled with other pieces of the same color of king.color so that the check
         # can be avoided by interruption the path through which a check is given
@@ -464,47 +497,24 @@ def check_mate(king, piece):
                         if piece_.status == ALIVE:
                             if position in piece_.available_moves(piece_.position, position):
                                 if position in piece.available_moves(piece.position, position):
-                                    MOVE_FLAG = False
-                                    checkmate = False
-                                    break
-                                else:
-                                    MOVE_FLAG, KILL_FLAG = check_interruptions(piece_, position, piece_.available_moves(piece_.position, position))
+                                    MOVE_FLAG, KILL_FLAG = check_interruptions(
+                                        piece_, position, piece_.available_moves(
+                                            piece_.position, position))
                                     if MOVE_FLAG:
-                                        pres_position = piece_.position
-                                        finalize_move(piece_, KILL_FLAG, position)
-                                        board_positions_backup = board.update_board_positions()
-                                # need to sort the following block in the finalize function
-                                        if check_for_check(king):
-#                                             revert_move(piece_, pres_position, position)
-                                            MOVE_FLAG = False
-                                            KILL_FLAG = False
-                                            BOARD_POSITIONS = board_positions_backup
-                                            checks.append(True)
-                                        else:
-                                            BOARD_POSITIONS = board_positions_backup
-                                            board.update_board()
-                                            checks.append(False)
+                                        if finalize_move(piece_, KILL_FLAG, position):
+                                            return False
     
-#     
-#     if MOVE_FLAG:
-#         finalize_move(king, KILL_FLAG, move)
-#         board_positions_backup = board.update_board_positions()
-# 
-#         if check_for_check(king):
-#             revert_move(king, king.position, move)
-#             MOVE_FLAG = False
-#             KILL_FLAG = False
-#             BOARD_POSITIONS = board_positions_backup
-#             checkmate = True
-#         else:
-#             checkmate = False
-#             
-#     print("checkmate: ",checkmate)
-    if False not in checks:
-        return True
-    else:
-        return False
+    for piece_ in pieces:
+        if piece.position in piece_.available_moves(piece_.position, piece.position):
+            if check_interruptions(
+                piece_, piece.position, piece_.available_moves(
+                    piece_.position, piece.position)
+                        ) == (True, True):
+                return False
 
+    return True
+    # one test case also to check if the piece giving check can be killed by
+    # pieces who got check
 
 class Board(object):
     def __init__(self):
@@ -621,9 +631,34 @@ def parse_input(user_input):
         print("No piece on the specified position")
 
 
+# def main():
+#     """Main Function"""
+# 
+#     create_pieces()
+#     global MOVE_FLAG, KILL_FLAG, checkmate, board
+#     board = Board()
+#     board.update_board()
+#     global userinput_list
+#     userinput_list = []
+#     checkmate = False
+#     print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
+#     while True:
+#         try:
+#             userinput = input('\nPlease specify the start position and final position:\n\n')
+#             userinput_list.append(userinput)
+#             print(userinput_list)
+#             MOVE_FLAG = False,
+#             KILL_FLAG = False
+#             parse_input(userinput)
+#             if checkmate:
+#                 break
+#         except ValueError:
+#             print("Please specify the user input correctly")
+#             
+#             
 def main():
-    """Main Function"""
-
+    """DEBUG MAIN FUNCTION"""
+ 
     create_pieces()
     global MOVE_FLAG, KILL_FLAG, checkmate, board
     board = Board()
@@ -644,7 +679,7 @@ def main():
                 userinput = input_
 #             userinput = input('\nPlease specify the start position and final position:\n\n')
 #             userinput_list.append(userinput)
-            
+             
                 print(userinput)
                 MOVE_FLAG = False,
                 KILL_FLAG = False
