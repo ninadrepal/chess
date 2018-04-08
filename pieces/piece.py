@@ -158,6 +158,7 @@ class Piece(object):
                 board.update_board()
             else:
                 print('Play a different Move. Its a CHECK!')
+                MOVE_FLAG = False  
         else:
             print("Invalid move for %s" % (self.__class__.__name__))
 
@@ -225,6 +226,7 @@ class Pawn(Piece):
                 board.update_board()
             else:
                 print('Play a different Move. Its a CHECK!')
+                MOVE_FLAG = False
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
 
@@ -309,6 +311,7 @@ class Knight(Piece):
                 board.update_board()
             else:
                 print('Play a different Move. Its a CHECK!')
+                MOVE_FLAG = False
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
 
@@ -437,6 +440,7 @@ class King(Piece):
                 board.update_board()
             else:
                 print('Play a different Move. Its a CHECK!')
+                MOVE_FLAG = False
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
 
@@ -501,20 +505,23 @@ def check_mate(king, piece):
                                         piece_, position, piece_.available_moves(
                                             piece_.position, position))
                                     if MOVE_FLAG:
-                                        if finalize_move(piece_, KILL_FLAG, position):
+                                        if finalize_move(piece_, KILL_FLAG, position, checkmate=True):
                                             return False
-    
-    for piece_ in pieces:
-        if piece.position in piece_.available_moves(piece_.position, piece.position):
-            if check_interruptions(
-                piece_, piece.position, piece_.available_moves(
-                    piece_.position, piece.position)
-                        ) == (True, True):
-                return False
-
-    return True
     # one test case also to check if the piece giving check can be killed by
     # pieces who got check
+    for _, piece_ in pieces:
+        if not isinstance(piece_, King):
+            if piece.position in piece_.available_moves(piece_.position, piece.position):
+                if check_interruptions(
+                    piece_, piece.position, piece_.available_moves(
+                        piece_.position, piece.position)
+                            ) == (True, True):
+                    if MOVE_FLAG:
+                        if finalize_move(piece_, KILL_FLAG, position, checkmate=True):
+                                            return False
+
+    return True
+
 
 class Board(object):
     def __init__(self):
@@ -615,7 +622,6 @@ def parse_input(user_input):
                     if checkmate:
                         print("Checkmate !!!")
                         print(piece.color, 'wins!')
-                        print("You may now ask %s to kindly fuck off :-)" %(board.turn))
                     else:
                         print("Its Check!")
                         print(board.turn, "to play...")
@@ -633,7 +639,7 @@ def parse_input(user_input):
 
 # def main():
 #     """Main Function"""
-# 
+#   
 #     create_pieces()
 #     global MOVE_FLAG, KILL_FLAG, checkmate, board
 #     board = Board()
@@ -654,11 +660,11 @@ def parse_input(user_input):
 #                 break
 #         except ValueError:
 #             print("Please specify the user input correctly")
-#             
-#             
+             
+                
 def main():
     """DEBUG MAIN FUNCTION"""
- 
+   
     create_pieces()
     global MOVE_FLAG, KILL_FLAG, checkmate, board
     board = Board()
@@ -675,11 +681,14 @@ def main():
 #                                 '5,5:4,7','5,8:4,7', '5,4:5,5', '6,6:5,5']
 #             userinput_list3 =['3,2:3,4', '5,7:5,5', '4,2:4,3', '7,2:7,4', '6,7:5,6', '4,7:4,5', '3,4:4,5', '3,4:4,5']
             userinput_list4 = ['5,2:5,4', '5,7:5,5', '7,1:6,3', '6,8:5,7', '6,3:5,5', '6,7:6,6', '4,1:8,5', '5,8:6,8', '8,5:6,7']
-            for input_ in userinput_list4:
+            userinput_list5 = ['5,2:5,4', '4,7:4,5', '4,1:5,2', '4,5:5,4', '5,2:2,5', '3,8:4,7']
+            userinput_list6 = ['4,2:4,4', '5,7:5', '5,7:5,5', '6,7:6,5', '4,4:5,5', '7,7:7,5', '7,1:6,3', '6,8:8,6', '5,5:5,6', '7,5:7,4', '6.4:5,5', '6,3:5,5', '8,6:3,1', '4,1:3,1', '4,8:8,4', '7,2:7,3', '8,4:5,7', '5,5:6,7', '5,7:5,6', '6,7:8,8', '8,7:8,5', '3,1:8,6', '8,6:6,6', '5,6:8,6', '5,2:5,4', '8,6:5,3', '6,2:5,3', '4,7:4,6', '6,1:2,5', '3,7:3,6', '8,8:7,6', '3,6:2,5', '7,6:6,4', '3,8:5,6', '6,4:5,6']
+            userinput_list7 = ['4,2:4,4', '1,7:1,5', '5,2:5,4', '7,8:8,6', '4,1:6,3', '1,5:1,4', '6,1:3,4', '2,7:2,6', '6,3:6,7', '5,7:5,5']
+            for input_ in userinput_list7:
                 userinput = input_
 #             userinput = input('\nPlease specify the start position and final position:\n\n')
 #             userinput_list.append(userinput)
-             
+               
                 print(userinput)
                 MOVE_FLAG = False,
                 KILL_FLAG = False
