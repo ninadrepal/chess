@@ -79,20 +79,22 @@ def check_for_check(self, move=None):
         pieces = white_pieces.items()
         king_pos = black_king['bk1'].position if move is None else move
 
-    check = False
+
     for _, piece in pieces:
         if piece.status == ALIVE:
-            if king_pos in piece.available_moves(piece.position, king_pos):
-#                 if not isinstance(piece, Knight):
-                if check_interruptions(piece, king_pos,
+#             if not isinstance(piece, Pawn):
+                if king_pos in piece.available_moves(piece.position, king_pos):
+                    if check_interruptions(piece, king_pos,
                                        piece.available_moves(
                                            piece.position,
                                            king_pos)) == (True, True):
-                    return True
+                        return True
+#             elif isinstance(piece, Pawn) and king_pos in piece.available_kill_moves(piece.position, king_pos):
+#                         return True
+                             
+                        
 
-                    
-
-    return check
+    return False
 
 
 def finalize_move(piece, kill_flag, next_position, checkmate=False):
@@ -170,16 +172,16 @@ class Pawn(Piece):
         self.symbol = '\u265F' if self.color == BLACK else '\u2659'
 
     def move(self, x, y):
-        (self.x, self.y) = self.position
         present_position = self.position
+        (x0, y0) = present_position
         next_position = (x, y)
         global MOVE_FLAG, KILL_FLAG, BOARD_POSITIONS
         if self.color == WHITE:
             initial_move = True if present_position[-1] == 2 else False
-            beginning_move = [(self.x, self.y + 2)]
+            beginning_move = [(x0, y0 + 2)]
             possible_kill_moves = [
-                (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)]
-            straight_move = [(self.x, self.y + 1)]
+                (x0 - 1, y0 + 1), (x0 + 1, y0 + 1)]
+            straight_move = [(x0, y0 + 1)]
 
             if BOARD_POSITIONS[next_position] is not None:
                 if BOARD_POSITIONS[next_position][-1].color == BLACK:
@@ -200,10 +202,10 @@ class Pawn(Piece):
 
         elif self.color == BLACK:
             initial_move = True if present_position[-1] == 7 else False
-            beginning_move = [(self.x, self.y - 2)]
+            beginning_move = [(x0, y0 - 2)]
             possible_kill_moves = [
-                (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)]
-            straight_move = [(self.x, self.y - 1)]
+                (x0 - 1, x0 - 1), (x0 + 1, y0 - 1)]
+            straight_move = [(x0, y0 - 1)]
 
             if BOARD_POSITIONS[next_position] is not None:
                 if BOARD_POSITIONS[next_position][-1].color == WHITE:
@@ -223,6 +225,10 @@ class Pawn(Piece):
 
         if MOVE_FLAG:
             if finalize_move(self, KILL_FLAG, next_position):
+#                 if self.position[-1] == 8 and self.color == WHITE:
+#                     self.symbol = '\u2655'
+#                 elif self.position[-1] == 1 and self.color == BLACK:
+#                     self.symbol = '\u265B'
                 board.update_board()
             else:
                 print('Play a different Move. Its a CHECK!')
@@ -237,21 +243,36 @@ class Pawn(Piece):
         if specified
         """
 
-        available_moves = []
+#         available_moves = []
+#         if self.color == WHITE:
+#             beginning_move = [(self.x, self.y + 2)]
+#             possible_kill_moves = [
+#                 (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)]
+#             straight_move = [(self.x, self.y + 1)]
+#             available_moves = beginning_move + possible_kill_moves + straight_move
+#         elif self.color == BLACK:
+#             beginning_move = [(self.x, self.y - 2)]
+#             possible_kill_moves = [
+#                 (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)]
+#             straight_move = [(self.x, self.y - 1)]
+#             available_moves = beginning_move + possible_kill_moves + straight_move
+        (x0, y0) = present_position
         if self.color == WHITE:
-            beginning_move = [(self.x, self.y + 2)]
-            possible_kill_moves = [
-                (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)]
-            straight_move = [(self.x, self.y + 1)]
-            available_moves = beginning_move + possible_kill_moves + straight_move
+            return [(x0 - 1, y0 + 1), (x0 + 1, y0 + 1)]
         elif self.color == BLACK:
-            beginning_move = [(self.x, self.y - 2)]
-            possible_kill_moves = [
-                (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)]
-            straight_move = [(self.x, self.y - 1)]
-            available_moves = beginning_move + possible_kill_moves + straight_move
-
-        return available_moves
+            return [(x0 - 1, y0 - 1), (x0 + 1, y0 - 1)]
+#         return available_moves
+    
+    def available_kill_moves(self, present_position, next_position):
+        """
+        Check available moves based on present position and next position
+        if specified
+        """
+        (x0, y0) = present_position
+        if self.color == WHITE:
+            return [(x0 - 1, y0 + 1), (x0 + 1, y0 + 1)]
+        elif self.color == BLACK:
+            return [(x0 - 1, y0 - 1), (x0 + 1, y0 - 1)]
 
 
 class Rook(Piece):
@@ -516,9 +537,10 @@ def check_mate(king, piece):
                     piece_, piece.position, piece_.available_moves(
                         piece_.position, piece.position)
                             ) == (True, True):
-                    if MOVE_FLAG:
-                        if finalize_move(piece_, KILL_FLAG, position, checkmate=True):
-                                            return False
+                    return False
+#                     if MOVE_FLAG:
+#                         if finalize_move(piece_, KILL_FLAG, position, checkmate=True):
+#                                             return False
 
     return True
 
@@ -639,7 +661,7 @@ def parse_input(user_input):
 
 # def main():
 #     """Main Function"""
-#   
+#     
 #     create_pieces()
 #     global MOVE_FLAG, KILL_FLAG, checkmate, board
 #     board = Board()
@@ -648,9 +670,34 @@ def parse_input(user_input):
 #     userinput_list = []
 #     checkmate = False
 #     print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
+#     try:
+#         userinput_list8 = ['4,2:4,4', 
+#                             '6,8:5,6', '5,7:5,4', '5,7:5,5', '4,4:5,5', '2,8:4,7', 
+#                             '4,8:8,4', '7,2:7,3', '8,4:7,4',
+#                             '4,1:4,3', '4,8:5,7', '4,3:4,4', '4,7:4,8', '6,8:2,4', '2,2:2,4',
+# #                                 
+#                             '4,8:5,7', '4,3:4,4', '4,7:4,8', '6,8:2,4', '2,2:2,4', '2,2:2,3'
+#                             , '4,3:4,7', '3,2:3,3', '5,8:5,6', '5,8:5,7', '4,3:4,5'
+#                             , '5,7:5,6', '2,8:3,6', '3,1:7,5', '7,8:6,6', '5,2:5,3'
+#                             , '6,6:5,4', '7,4:2,4', '7,4:7,2', '3,6:1,7', '2,4:1,5'
+#                             , '4,5:6,7', '5,7:4,8', '6,7:6,8']
+# #                                  
+# #                                ]
+#         for input_ in userinput_list8:
+#             userinput = input_
+#             
+#             print(userinput)
+#             MOVE_FLAG = False,
+#             KILL_FLAG = False
+#             parse_input(userinput)
+#     except ValueError:
+#         print("Please specify the user input correctly")
+#                      
 #     while True:
 #         try:
+#             print("For loop ended")
 #             userinput = input('\nPlease specify the start position and final position:\n\n')
+#             
 #             userinput_list.append(userinput)
 #             print(userinput_list)
 #             MOVE_FLAG = False,
@@ -664,7 +711,7 @@ def parse_input(user_input):
                 
 def main():
     """DEBUG MAIN FUNCTION"""
-   
+     
     create_pieces()
     global MOVE_FLAG, KILL_FLAG, checkmate, board
     board = Board()
@@ -684,11 +731,23 @@ def main():
             userinput_list5 = ['5,2:5,4', '4,7:4,5', '4,1:5,2', '4,5:5,4', '5,2:2,5', '3,8:4,7']
             userinput_list6 = ['4,2:4,4', '5,7:5', '5,7:5,5', '6,7:6,5', '4,4:5,5', '7,7:7,5', '7,1:6,3', '6,8:8,6', '5,5:5,6', '7,5:7,4', '6.4:5,5', '6,3:5,5', '8,6:3,1', '4,1:3,1', '4,8:8,4', '7,2:7,3', '8,4:5,7', '5,5:6,7', '5,7:5,6', '6,7:8,8', '8,7:8,5', '3,1:8,6', '8,6:6,6', '5,6:8,6', '5,2:5,4', '8,6:5,3', '6,2:5,3', '4,7:4,6', '6,1:2,5', '3,7:3,6', '8,8:7,6', '3,6:2,5', '7,6:6,4', '3,8:5,6', '6,4:5,6']
             userinput_list7 = ['4,2:4,4', '1,7:1,5', '5,2:5,4', '7,8:8,6', '4,1:6,3', '1,5:1,4', '6,1:3,4', '2,7:2,6', '6,3:6,7', '5,7:5,5']
-            for input_ in userinput_list7:
+            userinput_list8 = ['4,2:4,4', 
+                                '6,8:5,6', '5,7:5,4', '5,7:5,5', '4,4:5,5', '2,8:4,7', 
+                                '4,8:8,4', '7,2:7,3', '8,4:7,4',
+                                '4,1:4,3', '4,8:5,7', '4,3:4,4', '4,7:4,8', '6,8:2,4', '2,2:2,4',
+#                                 
+                                '4,8:5,7', '4,3:4,4', '4,7:4,8', '6,8:2,4', '2,2:2,4', '2,2:2,3'
+                                , '4,3:4,7', '3,2:3,3', '5,8:5,6', '5,8:5,7', '4,3:4,5'
+                                , '5,7:5,6', '2,8:3,6', '3,1:7,5', '7,8:6,6', '5,2:5,3'
+                                , '6,6:5,4', '7,4:2,4', '7,4:7,2', '3,6:1,7', '2,4:1,5'
+                                , '4,5:6,7', '5,7:4,8', '6,7:6,8', '6,6:5,8', '8,8:6,8', '1,2:1,3', '7,4:3,4', '7,5:6,4', '6,6:5,4', '5,5:5,6', '6,8:5,8', '7,1:6,3', '5,8:6,8', '5,6:5,7']
+#                                  
+#                                ]
+            for input_ in userinput_list8:
                 userinput = input_
 #             userinput = input('\nPlease specify the start position and final position:\n\n')
 #             userinput_list.append(userinput)
-               
+                 
                 print(userinput)
                 MOVE_FLAG = False,
                 KILL_FLAG = False
