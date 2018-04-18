@@ -1,6 +1,10 @@
 """
 Created on Feb 26, 2018
 @author: NREPAL
+
+
+specify start and final positions as:
+x0,y0:x1,y1
 """
 
 import itertools
@@ -659,17 +663,17 @@ def parse_input(user_input):
         print("No piece on the specified position")
 
 
-# def main():
-#     """Main Function"""
-#     
-#     create_pieces()
-#     global MOVE_FLAG, KILL_FLAG, checkmate, board
-#     board = Board()
-#     board.update_board()
-#     global userinput_list
-#     userinput_list = []
-#     checkmate = False
-#     print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
+def main():
+    """Main Function"""
+     
+    create_pieces()
+    global MOVE_FLAG, KILL_FLAG, checkmate, board
+    board = Board()
+    board.update_board()
+    global userinput_list
+    userinput_list = []
+    checkmate = False
+    print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
 #     try:
 #         userinput_list8 = ['4,2:4,4', 
 #                             '6,8:5,6', '5,7:5,4', '5,7:5,5', '4,4:5,5', '2,8:4,7', 
@@ -685,78 +689,76 @@ def parse_input(user_input):
 # #                                ]
 #         for input_ in userinput_list8:
 #             userinput = input_
-#             
+#              
 #             print(userinput)
 #             MOVE_FLAG = False,
 #             KILL_FLAG = False
 #             parse_input(userinput)
 #     except ValueError:
 #         print("Please specify the user input correctly")
-#                      
-#     while True:
-#         try:
-#             print("For loop ended")
-#             userinput = input('\nPlease specify the start position and final position:\n\n')
-#             
-#             userinput_list.append(userinput)
-#             print(userinput_list)
-#             MOVE_FLAG = False,
-#             KILL_FLAG = False
-#             parse_input(userinput)
-#             if checkmate:
-#                 break
-#         except ValueError:
-#             print("Please specify the user input correctly")
-             
-                
-def main():
-    """DEBUG MAIN FUNCTION"""
-     
-    create_pieces()
-    global MOVE_FLAG, KILL_FLAG, checkmate, board
-    board = Board()
-    board.update_board()
-    global userinput_list
-    userinput_list = []
-    checkmate = False
-    print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
+#                       
     while True:
         try:
-            userinput_list = ['5,2:5,4', '1,7:1,6', '4,1:6,3', 
-                    '1,6:1,5', '6,1:3,4', '1,5:1,4', '8,1:8,4','6,3:6,7']
-#             userinput_list2 = ['5,2:5,4', '3,7:3,5','7,1:6,3', '5,7:5,5', '6,3:5,5', '4,8:6,6',
-#                                 '5,5:4,7','5,8:4,7', '5,4:5,5', '6,6:5,5']
-#             userinput_list3 =['3,2:3,4', '5,7:5,5', '4,2:4,3', '7,2:7,4', '6,7:5,6', '4,7:4,5', '3,4:4,5', '3,4:4,5']
-            userinput_list4 = ['5,2:5,4', '5,7:5,5', '7,1:6,3', '6,8:5,7', '6,3:5,5', '6,7:6,6', '4,1:8,5', '5,8:6,8', '8,5:6,7']
-            userinput_list5 = ['5,2:5,4', '4,7:4,5', '4,1:5,2', '4,5:5,4', '5,2:2,5', '3,8:4,7']
-            userinput_list6 = ['4,2:4,4', '5,7:5', '5,7:5,5', '6,7:6,5', '4,4:5,5', '7,7:7,5', '7,1:6,3', '6,8:8,6', '5,5:5,6', '7,5:7,4', '6.4:5,5', '6,3:5,5', '8,6:3,1', '4,1:3,1', '4,8:8,4', '7,2:7,3', '8,4:5,7', '5,5:6,7', '5,7:5,6', '6,7:8,8', '8,7:8,5', '3,1:8,6', '8,6:6,6', '5,6:8,6', '5,2:5,4', '8,6:5,3', '6,2:5,3', '4,7:4,6', '6,1:2,5', '3,7:3,6', '8,8:7,6', '3,6:2,5', '7,6:6,4', '3,8:5,6', '6,4:5,6']
-            userinput_list7 = ['4,2:4,4', '1,7:1,5', '5,2:5,4', '7,8:8,6', '4,1:6,3', '1,5:1,4', '6,1:3,4', '2,7:2,6', '6,3:6,7', '5,7:5,5']
-            userinput_list8 = ['4,2:4,4', 
-                                '6,8:5,6', '5,7:5,4', '5,7:5,5', '4,4:5,5', '2,8:4,7', 
-                                '4,8:8,4', '7,2:7,3', '8,4:7,4',
-                                '4,1:4,3', '4,8:5,7', '4,3:4,4', '4,7:4,8', '6,8:2,4', '2,2:2,4',
-#                                 
-                                '4,8:5,7', '4,3:4,4', '4,7:4,8', '6,8:2,4', '2,2:2,4', '2,2:2,3'
-                                , '4,3:4,7', '3,2:3,3', '5,8:5,6', '5,8:5,7', '4,3:4,5'
-                                , '5,7:5,6', '2,8:3,6', '3,1:7,5', '7,8:6,6', '5,2:5,3'
-                                , '6,6:5,4', '7,4:2,4', '7,4:7,2', '3,6:1,7', '2,4:1,5'
-                                , '4,5:6,7', '5,7:4,8', '6,7:6,8', '6,6:5,8', '8,8:6,8', '1,2:1,3', '7,4:3,4', '7,5:6,4', '6,6:5,4', '5,5:5,6', '6,8:5,8', '7,1:6,3', '5,8:6,8', '5,6:5,7']
-#                                  
-#                                ]
-            for input_ in userinput_list8:
-                userinput = input_
-#             userinput = input('\nPlease specify the start position and final position:\n\n')
-#             userinput_list.append(userinput)
-                 
-                print(userinput)
-                MOVE_FLAG = False,
-                KILL_FLAG = False
-                parse_input(userinput)
-                if checkmate:
-                    break
-            break
+            userinput = input('\nPlease specify the start position and final position:\n\n')
+            userinput_list.append(userinput)
+            print(userinput_list)
+            MOVE_FLAG = False,
+            KILL_FLAG = False
+            parse_input(userinput)
+            if checkmate:
+                break
         except ValueError:
             print("Please specify the user input correctly")
+             
+                
+# def main():
+#     """DEBUG MAIN FUNCTION"""
+#      
+#     create_pieces()
+#     global MOVE_FLAG, KILL_FLAG, checkmate, board
+#     board = Board()
+#     board.update_board()
+#     global userinput_list
+#     userinput_list = []
+#     checkmate = False
+#     print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
+#     while True:
+#         try:
+#             userinput_list = ['5,2:5,4', '1,7:1,6', '4,1:6,3', 
+#                     '1,6:1,5', '6,1:3,4', '1,5:1,4', '8,1:8,4','6,3:6,7']
+# #             userinput_list2 = ['5,2:5,4', '3,7:3,5','7,1:6,3', '5,7:5,5', '6,3:5,5', '4,8:6,6',
+# #                                 '5,5:4,7','5,8:4,7', '5,4:5,5', '6,6:5,5']
+# #             userinput_list3 =['3,2:3,4', '5,7:5,5', '4,2:4,3', '7,2:7,4', '6,7:5,6', '4,7:4,5', '3,4:4,5', '3,4:4,5']
+#             userinput_list4 = ['5,2:5,4', '5,7:5,5', '7,1:6,3', '6,8:5,7', '6,3:5,5', '6,7:6,6', '4,1:8,5', '5,8:6,8', '8,5:6,7']
+#             userinput_list5 = ['5,2:5,4', '4,7:4,5', '4,1:5,2', '4,5:5,4', '5,2:2,5', '3,8:4,7']
+#             userinput_list6 = ['4,2:4,4', '5,7:5', '5,7:5,5', '6,7:6,5', '4,4:5,5', '7,7:7,5', '7,1:6,3', '6,8:8,6', '5,5:5,6', '7,5:7,4', '6.4:5,5', '6,3:5,5', '8,6:3,1', '4,1:3,1', '4,8:8,4', '7,2:7,3', '8,4:5,7', '5,5:6,7', '5,7:5,6', '6,7:8,8', '8,7:8,5', '3,1:8,6', '8,6:6,6', '5,6:8,6', '5,2:5,4', '8,6:5,3', '6,2:5,3', '4,7:4,6', '6,1:2,5', '3,7:3,6', '8,8:7,6', '3,6:2,5', '7,6:6,4', '3,8:5,6', '6,4:5,6']
+#             userinput_list7 = ['4,2:4,4', '1,7:1,5', '5,2:5,4', '7,8:8,6', '4,1:6,3', '1,5:1,4', '6,1:3,4', '2,7:2,6', '6,3:6,7', '5,7:5,5']
+#             userinput_list8 = ['4,2:4,4', 
+#                                 '6,8:5,6', '5,7:5,4', '5,7:5,5', '4,4:5,5', '2,8:4,7', 
+#                                 '4,8:8,4', '7,2:7,3', '8,4:7,4',
+#                                 '4,1:4,3', '4,8:5,7', '4,3:4,4', '4,7:4,8', '6,8:2,4', '2,2:2,4',
+# #                                 
+#                                 '4,8:5,7', '4,3:4,4', '4,7:4,8', '6,8:2,4', '2,2:2,4', '2,2:2,3'
+#                                 , '4,3:4,7', '3,2:3,3', '5,8:5,6', '5,8:5,7', '4,3:4,5'
+#                                 , '5,7:5,6', '2,8:3,6', '3,1:7,5', '7,8:6,6', '5,2:5,3'
+#                                 , '6,6:5,4', '7,4:2,4', '7,4:7,2', '3,6:1,7', '2,4:1,5'
+#                                 , '4,5:6,7', '5,7:4,8', '6,7:6,8', '6,6:5,8', '8,8:6,8', '1,2:1,3', '7,4:3,4', '7,5:6,4', '6,6:5,4', '5,5:5,6', '6,8:5,8', '7,1:6,3', '5,8:6,8', '5,6:5,7']
+# #                                  
+# #                                ]
+#             for input_ in userinput_list8:
+#                 userinput = input_
+# #             userinput = input('\nPlease specify the start position and final position:\n\n')
+# #             userinput_list.append(userinput)
+#                  
+#                 print(userinput)
+#                 MOVE_FLAG = False,
+#                 KILL_FLAG = False
+#                 parse_input(userinput)
+#                 if checkmate:
+#                     break
+#             break
+#         except ValueError:
+#             print("Please specify the user input correctly")
 
 if __name__ == main():
     main()
