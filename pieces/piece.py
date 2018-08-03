@@ -149,7 +149,7 @@ class Piece(object):
 
     def move(self, present_position, next_position, available_moves):
         """
-        Makes the move for the piece based upon its validity
+        Makes the move for a piece based upon its validity
         """
         global KILL_FLAG, MOVE_FLAG
         global BOARD_POSITIONS
@@ -180,6 +180,7 @@ class Pawn(Piece):
         (x0, y0) = present_position
         next_position = (x, y)
         global MOVE_FLAG, KILL_FLAG, BOARD_POSITIONS
+
         if self.color == WHITE:
             initial_move = True if present_position[-1] == 2 else False
             beginning_move = [(x0, y0 + 2)]
@@ -239,6 +240,7 @@ class Pawn(Piece):
                 MOVE_FLAG = False
         else:
             print("Invalid move for %s" %(self.__class__.__name__))
+    
 
 
     def available_moves(self, present_position, next_position):
@@ -629,11 +631,15 @@ def create_pieces():
 
 
 def parse_input(user_input):
-    
+
     init_pos, fin_pos = user_input.split(':')
     global MOVE_FLAG, checkmate
     x0, y0 = init_pos.split(',')
     x1, y1 = fin_pos.split(',')
+    if 1 in [x not in range(1,9) for x in [int(x0), int(x1), int(y0), int(y1)]]:
+        print("Position out of bounds. Please check the position specified")
+        return False
+
     try:
         piece = BOARD_POSITIONS[(int(x0), int(y0))][-1]
 
@@ -673,7 +679,7 @@ def main():
     global userinput_list
     userinput_list = []
     checkmate = False
-    print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...")
+    print("\n\n\nGame Set.\nLets Play!\n\nWhite to begin...\n\nThe input should be specified as x0,y0:x1,y1 where x0,y0 would be the start position and x1,y1 would be the final position of the piece you would want to move.")
 #     try:
 #         userinput_list8 = ['4,2:4,4', 
 #                             '6,8:5,6', '5,7:5,4', '5,7:5,5', '4,4:5,5', '2,8:4,7', 
@@ -708,7 +714,7 @@ def main():
             if checkmate:
                 break
         except ValueError:
-            print("Please specify the user input correctly")
+            print("Please specify the user input correctly. For eg: 1,2:1,4")
              
                 
 # def main():
